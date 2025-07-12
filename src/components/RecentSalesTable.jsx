@@ -2,6 +2,36 @@ import React from 'react';
 import './RecentSalesTable.css';
 
 export default function RecentSalesTable({ data }) {
+  // Calculate average prices for unique pins
+  const calculateAveragePrice = (data) => {
+    const pinAverages = {};
+    
+    data.forEach(sale => {
+      const set = sale.nft_edition_set_truncatedName || 'Unknown';
+      const shape = sale.nft_edition_shape_name || 'Unknown';
+      const variant = sale.nft_edition_variant || 'Unknown';
+      const price = parseFloat(sale.price) || 0;
+      
+      const pinKey = `${set} - ${shape} - ${variant}`;
+      
+      if (!pinAverages[pinKey]) {
+        pinAverages[pinKey] = {
+          total: 0,
+          count: 0,
+          average: 0
+        };
+      }
+      
+      pinAverages[pinKey].total += price;
+      pinAverages[pinKey].count += 1;
+      pinAverages[pinKey].average = pinAverages[pinKey].total / pinAverages[pinKey].count;
+    });
+    
+    return pinAverages;
+  };
+
+  const pinAverages = calculateAveragePrice(data);
+
   // Sort data by timestamp (most recent first) and take the latest 20 sales
   const recentSales = [...data]
     .sort((a, b) => new Date(b.updated_at_block_time) - new Date(a.updated_at_block_time))
@@ -22,6 +52,19 @@ export default function RecentSalesTable({ data }) {
     return `$${parseFloat(price).toLocaleString()}`;
   };
 
+  const getAveragePrice = (sale) => {
+    const set = sale.nft_edition_set_truncatedName || 'Unknown';
+    const shape = sale.nft_edition_shape_name || 'Unknown';
+    const variant = sale.nft_edition_variant || 'Unknown';
+    const pinKey = `${set} - ${shape} - ${variant}`;
+    
+    const avgData = pinAverages[pinKey];
+    if (avgData && avgData.count > 1) {
+      return formatPrice(avgData.average);
+    }
+    return 'N/A';
+  };
+
   return (
     <div className="recent-sales-container">
       <h2>Recent Sales</h2>
@@ -31,6 +74,7 @@ export default function RecentSalesTable({ data }) {
             <tr>
               <th>Time</th>
               <th>Price</th>
+              <th>Avg Price</th>
               <th>Buyer</th>
               <th>Seller</th>
               <th>Pin Details</th>
@@ -44,6 +88,9 @@ export default function RecentSalesTable({ data }) {
                 </td>
                 <td className="price">
                   {formatPrice(sale.price)}
+                </td>
+                <td className="avg-price">
+                  {getAveragePrice(sale)}
                 </td>
                 <td className="buyer">
                   {sale.receiver_username || 'Unknown'}
