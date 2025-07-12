@@ -15,6 +15,8 @@ function groupByPinAndSale(data) {
     const variant = row['nft_edition_variant'] || 'Unknown';
     const price = parseFloat(row['price']) || 0;
     const timestamp = row['updated_at_block_time'] || '';
+    const buyer = row['receiver_username'] || 'Unknown';
+    const seller = row['seller_username'] || 'Unknown';
     
     // Create a unique identifier for each pin
     const pinKey = `${set} - ${shape} - ${variant}`;
@@ -33,11 +35,13 @@ function groupByPinAndSale(data) {
     result[pinKey].sales.push({
       price,
       timestamp,
-      saleId: `${pinKey}_${timestamp}_${price}`
+      buyer,
+      seller,
+      saleId: `${pinKey}_${timestamp}_${price}_${buyer}_${seller}`
     });
     
     // Assign colors to individual sales
-    const saleKey = `${pinKey}_${timestamp}_${price}`;
+    const saleKey = `${pinKey}_${timestamp}_${price}_${buyer}_${seller}`;
     if (!colorMap[saleKey]) {
       const colors = [
         '#4f8cff', '#ffb347', '#6ee7b7', '#f87171', '#a78bfa', 
@@ -72,7 +76,7 @@ export default function TopPinsChart({ data }) {
   
   // Create datasets for each individual sale
   const datasets = uniqueSales.map(saleId => {
-    const [pinKey, timestamp, price] = saleId.split('_');
+    const [pinKey, timestamp, price, buyer, seller] = saleId.split('_');
     return {
       label: `$${parseFloat(price).toLocaleString()}`,
       data: topPins.map(([pin, pinData]) => {
@@ -119,7 +123,13 @@ export default function TopPinsChart({ data }) {
               },
               label: function(context) {
                 if (context.parsed.x > 0) {
-                  return `Sale: $${context.parsed.x.toLocaleString()}`;
+                  const saleId = uniqueSales[context.datasetIndex];
+                  const [pinKey, timestamp, price, buyer, seller] = saleId.split('_');
+                  return [
+                    `Sale: $${context.parsed.x.toLocaleString()}`,
+                    `Buyer: ${buyer}`,
+                    `Seller: ${seller}`
+                  ];
                 }
                 return null;
               },
