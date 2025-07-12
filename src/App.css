@@ -1,0 +1,113 @@
+.dashboard-container {
+  min-width: 1600px;
+  width: 100%;
+  margin: 0;
+  padding: 2rem;
+  background: #f5f7fa;
+  min-height: 100vh;
+  color: #333; /* Ensure good text contrast */
+  box-sizing: border-box;
+}
+
+.dashboard-loading, .dashboard-error {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-top: 3rem;
+  color: #333; /* Darker text for better readability */
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+  color: #1a1a1a; /* Very dark text for main heading */
+  font-weight: 600;
+}
+
+h2 {
+  color: #1a1a1a; /* Very dark text for all headings */
+  font-weight: 600;
+}
+
+/* Summary statistics */
+.summary-stats {
+  display: flex;
+  gap: 2rem;
+  margin: 2rem 0 3rem 0;
+  justify-content: center;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  min-width: 200px;
+  flex: 1;
+  max-width: 300px;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #4f8cff;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 1.1rem;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Chart container improvements */
+.chart-container {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  min-width: 1600px;
+}
+
+/* Responsive layout for larger screens */
+@media (min-width: 1400px) {
+  .dashboard-container {
+    padding: 2rem 4rem;
+  }
+  
+  h1 {
+    font-size: 3rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .dashboard-container {
+    padding: 2rem 6rem;
+  }
+} 
+/* Side-by-side charts layout */
+.charts-row {
+  display: flex;
+  gap: 2rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.charts-row .chart-container {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+/* Responsive charts row */
+@media (max-width: 1800px) {
+  .charts-row {
+    flex-direction: column;
+  }
+  
+  .charts-row .chart-container {
+    min-width: 1600px;
+  }
+}

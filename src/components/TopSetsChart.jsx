@@ -1,0 +1,91 @@
+import React from 'react';
+import { Bar } from 'react-chartjs-2';
+import { Chart, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+
+Chart.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+
+function groupBySet(data) {
+  const result = {};
+  
+  data.forEach(row => {
+    const set = row['nft_edition_set_truncatedName'] || 'Unknown';
+    const price = parseFloat(row['price']) || 0;
+    
+    if (!result[set]) {
+      result[set] = {
+        totalSales: 0,
+        transactionCount: 0
+      };
+    }
+    
+    result[set].totalSales += price;
+    result[set].transactionCount += 1;
+  });
+  
+  return result;
+}
+
+export default function TopSetsChart({ data }) {
+  const grouped = groupBySet(data);
+  
+  // Sort by total sales descending and take top 10
+  const topSets = Object.entries(grouped)
+    .sort(([,a], [,b]) => b.totalSales - a.totalSales)
+    .slice(0, 10);
+  
+  const labels = topSets.map(([setName, setData]) => {
+    // Truncate long labels for better display
+    const displayName = setName.length > 40 ? setName.substring(0, 37) + '...' : setName;
+    return displayName;
+  });
+  
+  const values = topSets.map(([, setData]) => setData.totalSales);
+
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: 'Total Sales',
+        data: values,
+        backgroundColor: '#ffb347',
+      },
+    ],
+  };
+
+  return (
+    <div style={{ margin: '2rem 0' }}>
+      <h2>Top 10 Sets by Sales Volume</h2>
+      <Bar data={chartData} options={{
+        indexAxis: 'y', // This makes it horizontal
+        responsive: true,
+        plugins: { 
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: function(context) {
+                const setName = topSets[context[0].dataIndex][0];
+                return setName;
+              },
+              label: function(context) {
+                const setData = topSets[context[0].dataIndex][1];
+                return [
+                  `Total Sales: $${context.parsed.x.toLocaleString()}`,
+                  `Transactions: ${setData.transactionCount}`
+                ];
+              }
+            }
+          }
+        },
+        scales: { 
+          x: { 
+            title: { display: true, text: 'Total Sales ($)' },
+            beginAtZero: true
+          }, 
+          y: { 
+            title: { display: true, text: 'Edition Set' }
+          } 
+        }
+      }} />
+    </div>
+  );
+} 

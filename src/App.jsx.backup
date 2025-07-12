@@ -1,0 +1,61 @@
+import React, { useEffect, useState } from 'react';
+import { fetchSheetData } from './utils/fetchSheetData';
+import SalesVolumeChart from './components/SalesVolumeChart';
+import PinsSoldChart from './components/PinsSoldChart';
+import EditionVariantPieChart from './components/EditionVariantPieChart';
+import TopReceiversChart from './components/TopReceiversChart';
+import TopSellersChart from './components/TopSellersChart';
+import './App.css';
+
+function App() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchSheetData()
+      .then(setData)
+      .catch((err) => setError(err.message || 'Error loading data'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className="dashboard-loading">Loading data...</div>;
+  if (error) return <div className="dashboard-error">{error}</div>;
+
+  return (
+    <div className="dashboard-container">
+      <h1>Pinnacle Events Dashboard</h1>
+      
+      <div className="charts-row">
+        <div className="chart-container">
+        <SalesVolumeChart data={data} />
+      </div>
+      
+      <div className="charts-row">
+        <div className="chart-container">
+        <PinsSoldChart data={data} />
+      </div>
+      
+      <div className="charts-row">
+        <div className="chart-container">
+        <EditionVariantPieChart data={data} />
+      </div>
+      
+      <div className="charts-row">
+        <div className="chart-container">
+        <TopReceiversChart data={data} />
+      </div>
+      
+      <div className="charts-row">
+        <div className="chart-container">
+        <TopSellersChart data={data} />
+      </div>
+      
+      <div style={{ textAlign: 'center', marginTop: '2rem', color: '#666' }}>
+        Data loaded: {data.length} total transactions
+      </div>
+    </div>
+  );
+}
+
+export default App; 
