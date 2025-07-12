@@ -34,9 +34,9 @@ function App() {
 
   return (
     <div className="dashboard-container">
-      <h1>Disney Pinnacle Dashboard</h1>
+      <h1>Disney Pinnacle Marketplace Event V (July 11th - 13th)</h1>
       <p style={{ textAlign: 'center', color: '#666', marginBottom: '0.5rem', fontSize: '1rem' }}>
-        Pinnacle Marketplace Event V (July 11th - 13th) • Data Updates Every 15 Minutes
+        Data Updates Every 15 Minutes
       </p>
       
       <div className="summary-stats">
