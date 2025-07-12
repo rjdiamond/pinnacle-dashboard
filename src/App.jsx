@@ -10,6 +10,7 @@ import EditionShapePieChart from './components/EditionShapePieChart';
 import EditionSeriesPieChart from './components/EditionSeriesPieChart';
 import TopReceiversChart from './components/TopReceiversChart';
 import TopSellersChart from './components/TopSellersChart';
+import RecentSalesTable from './components/RecentSalesTable';
 import './App.css';
 
 function App() {
@@ -101,6 +102,12 @@ function App() {
         
         <div className="chart-container">
           <TopSellersChart data={data} />
+        </div>
+      </div>
+
+      <div className="charts-row">
+        <div className="chart-container">
+          <RecentSalesTable data={data} />
         </div>
       </div>
       

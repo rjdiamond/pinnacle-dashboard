@@ -1,0 +1,131 @@
+.recent-sales-container {
+  width: 100%;
+}
+
+.recent-sales-container h2 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.table-container {
+  max-height: 600px;
+  overflow-y: auto;
+  border-radius: 8px;
+  border: 1px solid #e1e5e9;
+}
+
+.recent-sales-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 0.9rem;
+}
+
+.recent-sales-table thead {
+  background: linear-gradient(135deg, #4A90E2, #8B5CF6);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.recent-sales-table th {
+  padding: 1rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.recent-sales-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: top;
+}
+
+.recent-sales-table tbody tr:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+.recent-sales-table tbody tr:nth-child(even) {
+  background-color: #fafbfc;
+}
+
+.recent-sales-table tbody tr:nth-child(even):hover {
+  background-color: #f0f2f5;
+}
+
+/* Column-specific styling */
+.timestamp {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.85rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.price {
+  font-weight: 600;
+  color: #10B981;
+  font-size: 1rem;
+}
+
+.buyer, .seller {
+  font-weight: 500;
+  color: #374151;
+}
+
+.pin-details {
+  max-width: 300px;
+}
+
+.pin-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.set-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.9rem;
+}
+
+.shape-variant {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .recent-sales-table {
+    font-size: 0.8rem;
+  }
+  
+  .recent-sales-table th,
+  .recent-sales-table td {
+    padding: 0.5rem 0.5rem;
+  }
+  
+  .pin-details {
+    max-width: 200px;
+  }
+}
+
+/* Scrollbar styling */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+} 
