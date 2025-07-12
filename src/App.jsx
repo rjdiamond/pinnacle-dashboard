@@ -15,12 +15,16 @@ import './App.css';
 
 function App() {
   const [data, setData] = useState([]);
+  const [fullData, setFullData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchSheetData()
-      .then(setData)
+      .then(({ filteredData, fullData }) => {
+        setData(filteredData);
+        setFullData(fullData);
+      })
       .catch((err) => setError(err.message || 'Error loading data'))
       .finally(() => setLoading(false));
   }, []);
@@ -107,7 +111,7 @@ function App() {
 
       <div className="charts-row">
         <div className="chart-container">
-          <RecentSalesTable data={data} />
+          <RecentSalesTable data={data} fullData={fullData} />
         </div>
       </div>
       

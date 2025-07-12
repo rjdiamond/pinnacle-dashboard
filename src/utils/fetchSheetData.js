@@ -50,9 +50,10 @@ const getAnalyticsData = async () => {
           header: true,
           skipEmptyLines: true,
           complete: (results) => {
-            const filteredData = filterDataByDate(results.data);
-            console.log(`Analytics data loaded: ${filteredData.length} records`);
-            resolve(filteredData);
+            const fullData = results.data;
+            const filteredData = filterDataByDate(fullData);
+            console.log(`Analytics data loaded: ${filteredData.length} records (filtered from ${fullData.length} total)`);
+            resolve({ filteredData, fullData });
           },
           error: reject,
         });
@@ -72,9 +73,10 @@ const getAnalyticsData = async () => {
           header: true,
           skipEmptyLines: true,
           complete: (results) => {
-            const filteredData = filterDataByDate(results.data);
-            console.log(`Analytics data loaded: ${filteredData.length} records`);
-            resolve(filteredData);
+            const fullData = results.data;
+            const filteredData = filterDataByDate(fullData);
+            console.log(`Analytics data loaded: ${filteredData.length} records (filtered from ${fullData.length} total)`);
+            resolve({ filteredData, fullData });
           },
           error: reject,
         });
@@ -85,7 +87,7 @@ const getAnalyticsData = async () => {
   }
   
   // Final fallback: Return sample data structure
-  return [
+  const sampleData = [
     {
       updated_at_block_time: '2025-07-12T19:08:10.735715Z',
       nft_id: '1468906216',
@@ -107,6 +109,8 @@ const getAnalyticsData = async () => {
       cursor: 'sample_cursor'
     }
   ];
+  
+  return { filteredData: sampleData, fullData: sampleData };
 };
 
 // Export with a generic name

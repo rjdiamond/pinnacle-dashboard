@@ -1,12 +1,12 @@
 import React from 'react';
 import './RecentSalesTable.css';
 
-export default function RecentSalesTable({ data }) {
-  // Calculate average prices for unique pins
-  const calculateAveragePrice = (data) => {
+export default function RecentSalesTable({ data, fullData }) {
+  // Calculate average prices for unique pins using FULL CSV data
+  const calculateAveragePrice = (fullData) => {
     const pinAverages = {};
     
-    data.forEach(sale => {
+    fullData.forEach(sale => {
       const set = sale.nft_edition_set_truncatedName || 'Unknown';
       const shape = sale.nft_edition_shape_name || 'Unknown';
       const variant = sale.nft_edition_variant || 'Unknown';
@@ -30,7 +30,9 @@ export default function RecentSalesTable({ data }) {
     return pinAverages;
   };
 
-  const pinAverages = calculateAveragePrice(data);
+  // Use fullData if available, otherwise fall back to filtered data
+  const dataForAverages = fullData || data;
+  const pinAverages = calculateAveragePrice(dataForAverages);
 
   // Sort data by timestamp (most recent first) and take the latest 20 sales
   const recentSales = [...data]
