@@ -50,6 +50,35 @@ export default function TopPinsChart({ data }) {
     .sort(([,a], [,b]) => b.totalSales - a.totalSales)
     .slice(0, 10);
   
+  // Get all unique sales across all pins
+  const allSales = new Set();
+  topPins.forEach(([pinKey, pinData]) => {
+    pinData.sales.forEach(sale => {
+      allSales.add(sale.saleId);
+    });
+  });
+  const uniqueSales = Array.from(allSales);
+  
+  // Create datasets for each individual sale with alternating colors
+  const datasets = uniqueSales.map((saleId, index) => {
+    const [pinKey, timestamp, price, buyer, seller] = saleId.split('_');
+    const pinIndex = topPins.findIndex(([pin, pinData]) => pin === pinKey);
+    
+    // Alternate colors based on the pin's position (not the sale's position)
+    const isEvenPin = pinIndex % 2 === 0;
+    const baseColor = isEvenPin ? '#4A90E2' : '#8B5CF6'; // Blue for even, Purple for odd
+    
+    return {
+      label: `$${parseFloat(price).toLocaleString()}`,
+      data: topPins.map(([pin, pinData]) => {
+        const matchingSale = pinData.sales.find(sale => sale.saleId === saleId);
+        return matchingSale ? matchingSale.price : 0;
+      }),
+      backgroundColor: baseColor,
+      stack: 'Stack 0',
+    };
+  });
+  
   const labels = topPins.map(([pinKey, pinData]) => {
     // Split the pin key into set and shape/variant
     const parts = pinKey.split(' - ');
@@ -64,31 +93,9 @@ export default function TopPinsChart({ data }) {
     return [displaySet, displayShapeVariant];
   });
 
-  // Create alternating colors for each bar
-  const alternatingColors = [
-    '#4A90E2', // Blue
-    '#8B5CF6', // Purple
-    '#4A90E2', // Blue
-    '#8B5CF6', // Purple
-    '#4A90E2', // Blue
-    '#8B5CF6', // Purple
-    '#4A90E2', // Blue
-    '#8B5CF6', // Purple
-    '#4A90E2', // Blue
-    '#8B5CF6'  // Purple
-  ];
-
   const chartData = {
     labels,
-    datasets: [
-      {
-        label: 'Total Sales',
-        data: topPins.map(([, pinData]) => pinData.totalSales),
-        backgroundColor: alternatingColors,
-        borderColor: alternatingColors.map(color => color.replace('0.8', '1')),
-        borderWidth: 1,
-      },
-    ],
+    datasets,
   };
 
   return (
@@ -106,29 +113,28 @@ export default function TopPinsChart({ data }) {
                 return pinKey;
               },
               label: function(context) {
-                return `Total Sales: $${context.parsed.x.toLocaleString()}`;
+                if (context.parsed.x > 0) {
+                  const saleId = uniqueSales[context.datasetIndex];
+                  const [pinKey, timestamp, price, buyer, seller] = saleId.split('_');
+                  return [
+                    `Sale: $${context.parsed.x.toLocaleString()}`,
+                    `Buyer: ${buyer}`,
+                    `Seller: ${seller}`
+                  ];
+                }
+                return null;
               },
               afterBody: function(context) {
                 const pinData = topPins[context[0].dataIndex][1];
                 const totalSales = pinData.sales.reduce((sum, sale) => sum + sale.price, 0);
-                
-                // Show recent sales with buyer/seller info
-                const recentSales = pinData.sales.slice(-3); // Last 3 sales
-                const salesInfo = recentSales.map(sale => 
-                  `• $${sale.price} - ${sale.buyer} → ${sale.seller}`
-                );
-                
                 return [
                   '',
+                  `Total Sales: $${totalSales.toLocaleString()}`,
                   `Number of Sales: ${pinData.sales.length}`,
                   `Set: ${pinData.set}`,
                   `Shape: ${pinData.shape}`,
-                  `Variant: ${pinData.variant}`,
-                  '',
-                  'Recent Sales:',
-                  ...salesInfo,
-                  pinData.sales.length > 3 ? `... and ${pinData.sales.length - 3} more` : ''
-                ].filter(Boolean);
+                  `Variant: ${pinData.variant}`
+                ];
               }
             }
           }
@@ -136,10 +142,12 @@ export default function TopPinsChart({ data }) {
         scales: { 
           x: { 
             title: { display: true, text: 'Sales Amount ($)' },
-            beginAtZero: true
+            beginAtZero: true,
+            stacked: true
           }, 
           y: { 
-            title: { display: true, text: 'Pin (Set - Shape - Variant)' }
+            title: { display: true, text: 'Pin (Set - Shape - Variant)' },
+            stacked: true
           } 
         }
       }} />
