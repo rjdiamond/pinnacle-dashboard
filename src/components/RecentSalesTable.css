@@ -8,7 +8,7 @@
 }
 
 .table-container {
-  max-height: 600px;
+  max-height: 800px;
   overflow-y: auto;
   border-radius: 8px;
   border: 1px solid #e1e5e9;
@@ -31,7 +31,7 @@
 
 .recent-sales-table th {
   padding: 1rem 0.75rem;
-  text-align: left;
+  text-align: center;
   font-weight: 600;
   font-size: 0.95rem;
 }
@@ -39,7 +39,8 @@
 .recent-sales-table td {
   padding: 0.75rem;
   border-bottom: 1px solid #f0f0f0;
-  vertical-align: top;
+  vertical-align: middle;
+  text-align: center;
 }
 
 .recent-sales-table tbody tr:hover {
@@ -61,12 +62,14 @@
   font-size: 0.85rem;
   color: #666;
   white-space: nowrap;
+  text-align: center;
 }
 
 .price {
   font-weight: 600;
   color: #10B981;
   font-size: 1rem;
+  text-align: center;
 }
 
 .avg-price {
@@ -74,6 +77,7 @@
   color: #8B5CF6;
   font-size: 0.9rem;
   font-style: italic;
+  text-align: center;
 }
 
 .total-minted {
@@ -86,16 +90,19 @@
 .buyer, .seller {
   font-weight: 500;
   color: #374151;
+  text-align: center;
 }
 
 .pin-details {
   max-width: 300px;
+  text-align: center;
 }
 
 .pin-info {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  align-items: center;
 }
 
 .set-name {

@@ -34,10 +34,10 @@ export default function RecentSalesTable({ data, fullData }) {
   const dataForAverages = fullData || data;
   const pinAverages = calculateAveragePrice(dataForAverages);
 
-  // Sort data by timestamp (most recent first) and take the latest 20 sales
+  // Sort data by timestamp (most recent first) and take the latest 500 sales
   const recentSales = [...data]
     .sort((a, b) => new Date(b.updated_at_block_time) - new Date(a.updated_at_block_time))
-    .slice(0, 20);
+    .slice(0, 500);
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
