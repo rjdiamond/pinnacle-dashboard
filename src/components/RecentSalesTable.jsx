@@ -51,7 +51,7 @@ export default function RecentSalesTable({ data, fullData }) {
   };
 
   const formatPrice = (price) => {
-    return `$${parseFloat(price).toLocaleString()}`;
+    return `$${parseFloat(price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const getAveragePrice = (sale) => {
@@ -76,7 +76,7 @@ export default function RecentSalesTable({ data, fullData }) {
             <tr>
               <th>Time</th>
               <th>Price</th>
-              <th>Avg Price</th>
+              <th>Average Price (All Events)</th>
               <th>Buyer</th>
               <th>Seller</th>
               <th>Pin Details</th>
