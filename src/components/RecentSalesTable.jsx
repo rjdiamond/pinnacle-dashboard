@@ -34,10 +34,9 @@ export default function RecentSalesTable({ data, fullData }) {
   const dataForAverages = fullData || data;
   const pinAverages = calculateAveragePrice(dataForAverages);
 
-  // Sort data by timestamp (most recent first) and take the latest 500 sales
+  // Sort data by timestamp (most recent first) and show ALL sales
   const recentSales = [...data]
-    .sort((a, b) => new Date(b.updated_at_block_time) - new Date(a.updated_at_block_time))
-    .slice(0, 500);
+    .sort((a, b) => new Date(b.updated_at_block_time) - new Date(a.updated_at_block_time));
 
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
@@ -87,7 +86,7 @@ export default function RecentSalesTable({ data, fullData }) {
 
   return (
     <div className="recent-sales-container">
-      <h2>Recent Sales</h2>
+      <h2>Recent Sales (Full Event)</h2>
       <div className="table-container">
         <table className="recent-sales-table">
           <thead>
