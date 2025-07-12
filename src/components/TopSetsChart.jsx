@@ -10,16 +10,43 @@ function groupBySet(data) {
   data.forEach(row => {
     const set = row['nft_edition_set_truncatedName'] || 'Unknown';
     const price = parseFloat(row['price']) || 0;
+    const buyer = row['receiver_username'] || 'Unknown';
+    const seller = row['seller_username'] || 'Unknown';
+    const shape = row['nft_edition_shape_name'] || 'Unknown';
+    const variant = row['nft_edition_variant'] || 'Unknown';
+    const timestamp = row['updated_at_block_time'] || '';
     
     if (!result[set]) {
       result[set] = {
         totalSales: 0,
-        transactionCount: 0
+        transactionCount: 0,
+        sales: [],
+        uniquePins: new Set(),
+        uniqueBuyers: new Set(),
+        uniqueSellers: new Set()
       };
     }
     
     result[set].totalSales += price;
     result[set].transactionCount += 1;
+    result[set].sales.push({
+      price,
+      buyer,
+      seller,
+      shape,
+      variant,
+      timestamp
+    });
+    result[set].uniquePins.add(`${shape} - ${variant}`);
+    result[set].uniqueBuyers.add(buyer);
+    result[set].uniqueSellers.add(seller);
+  });
+  
+  // Convert Sets to arrays for easier handling
+  Object.keys(result).forEach(setName => {
+    result[setName].uniquePins = Array.from(result[setName].uniquePins);
+    result[setName].uniqueBuyers = Array.from(result[setName].uniqueBuyers);
+    result[setName].uniqueSellers = Array.from(result[setName].uniqueSellers);
   });
   
   return result;
@@ -70,8 +97,26 @@ export default function TopSetsChart({ data }) {
                 const setData = topSets[context[0].dataIndex][1];
                 return [
                   `Total Sales: $${context.parsed.x.toLocaleString()}`,
-                  `Transactions: ${setData.transactionCount}`
+                  `Transactions: ${setData.transactionCount}`,
+                  `Unique Pins: ${setData.uniquePins.length}`,
+                  `Unique Buyers: ${setData.uniqueBuyers.length}`,
+                  `Unique Sellers: ${setData.uniqueSellers.length}`
                 ];
+              },
+              afterBody: function(context) {
+                const setData = topSets[context[0].dataIndex][1];
+                const recentSales = setData.sales.slice(-3); // Show last 3 sales
+                
+                const salesInfo = recentSales.map(sale => 
+                  `• ${sale.shape} (${sale.variant}) - $${sale.price} - ${sale.buyer} → ${sale.seller}`
+                );
+                
+                return [
+                  '',
+                  'Recent Sales:',
+                  ...salesInfo,
+                  setData.sales.length > 3 ? `... and ${setData.sales.length - 3} more` : ''
+                ].filter(Boolean);
               }
             }
           }
