@@ -88,6 +88,9 @@ export default function TopSetsChart({ data }) {
         plugins: { 
           legend: { display: false },
           tooltip: {
+            enabled: true,
+            mode: 'index',
+            intersect: false,
             callbacks: {
               title: function(context) {
                 const setName = topSets[context[0].dataIndex][0];
@@ -107,19 +110,27 @@ export default function TopSetsChart({ data }) {
                 const setData = topSets[context[0].dataIndex][1];
                 const recentSales = setData.sales.slice(-3); // Show last 3 sales
                 
+                if (recentSales.length === 0) return [];
+                
                 const salesInfo = recentSales.map(sale => 
                   `• ${sale.shape} (${sale.variant}) - $${sale.price} - ${sale.buyer} → ${sale.seller}`
                 );
                 
-                return [
-                  '',
-                  'Recent Sales:',
-                  ...salesInfo,
-                  setData.sales.length > 3 ? `... and ${setData.sales.length - 3} more` : ''
-                ].filter(Boolean);
+                const result = ['', 'Recent Sales:'];
+                result.push(...salesInfo);
+                
+                if (setData.sales.length > 3) {
+                  result.push(`... and ${setData.sales.length - 3} more`);
+                }
+                
+                return result;
               }
             }
           }
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false,
         },
         scales: { 
           x: { 
