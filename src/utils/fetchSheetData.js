@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
 
-// Data source URL - using environment variable for security
-const DATA_URL = import.meta.env.VITE_DATA_SOURCE_URL || 'https://api.example.com/data';
+// Use a generic API endpoint that doesn't reveal the data source
+const API_ENDPOINT = '/api/analytics-data';
 
 // Fallback to local data
 const LOCAL_DATA_URL = '/pinnacle_events.csv';
@@ -16,25 +16,24 @@ function filterDataByDate(data) {
   });
 }
 
-// Additional obfuscation: encode URL parts
-const getSecureEndpoint = () => {
-  if (import.meta.env.VITE_DATA_SOURCE_URL) {
-    return import.meta.env.VITE_DATA_SOURCE_URL;
-  }
-  // Fallback that doesn't reveal the actual source
-  return 'https://api.analytics.example.com/v1/data';
-};
-
-// Obfuscated data fetching to hide source
-async function fetchFromSecureSource() {
+// Secure data fetching that completely hides the source
+async function fetchFromSecureAPI() {
   try {
-    const endpoint = getSecureEndpoint();
-    const response = await fetch(endpoint);
+    // This will be handled by a server-side proxy or API route
+    const response = await fetch(API_ENDPOINT, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
     if (response.ok) {
-      return await response.text();
+      const result = await response.json();
+      if (result.success && result.data) {
+        return result.data; // This is the CSV string
+      }
     }
   } catch (error) {
-    // Generic error message that doesn't reveal the data source
     console.warn('Analytics service temporarily unavailable');
   }
   return null;
@@ -43,8 +42,8 @@ async function fetchFromSecureSource() {
 // Additional obfuscation: wrap in a generic function name
 const getAnalyticsData = async () => {
   try {
-    // Fetch from secure data source
-    const csv = await fetchFromSecureSource();
+    // Try secure API first
+    const csv = await fetchFromSecureAPI();
     if (csv) {
       return new Promise((resolve, reject) => {
         Papa.parse(csv, {
