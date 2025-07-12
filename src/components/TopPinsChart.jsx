@@ -62,11 +62,14 @@ export default function TopPinsChart({ data }) {
   // Create datasets for each individual sale with alternating colors
   const datasets = uniqueSales.map((saleId, index) => {
     const [pinKey, timestamp, price, buyer, seller] = saleId.split('_');
-    const pinIndex = topPins.findIndex(([pin, pinData]) => pin === pinKey);
     
-    // Alternate colors based on the pin's position (not the sale's position)
-    const isEvenPin = pinIndex % 2 === 0;
-    const baseColor = isEvenPin ? '#4A90E2' : '#8B5CF6'; // Blue for even, Purple for odd
+    // Find which sale this is within its pin
+    const pinData = topPins.find(([pin, data]) => pin === pinKey)[1];
+    const saleIndex = pinData.sales.findIndex(sale => sale.saleId === saleId);
+    
+    // Alternate colors within each bar: blue, green, blue, green, etc.
+    const isEvenSale = saleIndex % 2 === 0;
+    const baseColor = isEvenSale ? '#4A90E2' : '#10B981'; // Blue for even, Green for odd
     
     return {
       label: `$${parseFloat(price).toLocaleString()}`,
