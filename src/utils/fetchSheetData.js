@@ -16,17 +16,26 @@ function filterDataByDate(data) {
   });
 }
 
+// Additional obfuscation: encode URL parts
+const getSecureEndpoint = () => {
+  if (import.meta.env.VITE_DATA_SOURCE_URL) {
+    return import.meta.env.VITE_DATA_SOURCE_URL;
+  }
+  // Fallback that doesn't reveal the actual source
+  return 'https://api.analytics.example.com/v1/data';
+};
+
 // Obfuscated data fetching to hide source
 async function fetchFromSecureSource() {
   try {
-    // Use a more generic error message to avoid revealing the source
-    const response = await fetch(DATA_URL);
+    const endpoint = getSecureEndpoint();
+    const response = await fetch(endpoint);
     if (response.ok) {
       return await response.text();
     }
   } catch (error) {
     // Generic error message that doesn't reveal the data source
-    console.warn('Data source temporarily unavailable');
+    console.warn('Analytics service temporarily unavailable');
   }
   return null;
 }
