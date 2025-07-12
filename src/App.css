@@ -22,6 +22,30 @@ h1 {
   font-size: 2.5rem;
   color: #1a1a1a; /* Very dark text for main heading */
   font-weight: 600;
+  background: linear-gradient(135deg, #FFD700, #FFA500, #FFD700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+h1::before {
+  content: '👑';
+  position: absolute;
+  left: -40px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+}
+
+h1::after {
+  content: '👑';
+  position: absolute;
+  right: -40px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
 }
 
 h2 {
