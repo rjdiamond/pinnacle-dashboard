@@ -76,6 +76,13 @@
   font-style: italic;
 }
 
+.total-minted {
+  font-weight: 600;
+  color: #F59E0B;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
 .buyer, .seller {
   font-weight: 500;
   color: #374151;

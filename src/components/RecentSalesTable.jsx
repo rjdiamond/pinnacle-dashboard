@@ -67,6 +67,24 @@ export default function RecentSalesTable({ data, fullData }) {
     return 'N/A';
   };
 
+  const getTotalMinted = (sale) => {
+    const set = sale.nft_edition_set_truncatedName || 'Unknown';
+    const shape = sale.nft_edition_shape_name || 'Unknown';
+    const variant = sale.nft_edition_variant || 'Unknown';
+    
+    // Find the matching sale in fullData to get the total_minted value
+    const matchingSale = fullData.find(fullSale => 
+      (fullSale.nft_edition_set_truncatedName || 'Unknown') === set &&
+      (fullSale.nft_edition_shape_name || 'Unknown') === shape &&
+      (fullSale.nft_edition_variant || 'Unknown') === variant
+    );
+    
+    if (matchingSale && matchingSale.nft_edition_total_minted) {
+      return parseInt(matchingSale.nft_edition_total_minted).toLocaleString();
+    }
+    return 'N/A';
+  };
+
   return (
     <div className="recent-sales-container">
       <h2>Recent Sales</h2>
@@ -77,6 +95,7 @@ export default function RecentSalesTable({ data, fullData }) {
               <th>Time</th>
               <th>Price</th>
               <th>Average Price (All Events)</th>
+              <th>Total Minted</th>
               <th>Buyer</th>
               <th>Seller</th>
               <th>Pin Details</th>
@@ -93,6 +112,9 @@ export default function RecentSalesTable({ data, fullData }) {
                 </td>
                 <td className="avg-price">
                   {getAveragePrice(sale)}
+                </td>
+                <td className="total-minted">
+                  {getTotalMinted(sale)}
                 </td>
                 <td className="buyer">
                   {sale.receiver_username || 'Unknown'}
