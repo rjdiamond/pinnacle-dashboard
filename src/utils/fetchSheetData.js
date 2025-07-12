@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
 
-// Data source URL
-const DATA_URL = 'https://docs.google.com/spreadsheets/d/1Qb1NpuQi9_KMPhi7NpZ_9xhJW8xXP8_VCaV-ffM5tAE/export?format=csv&gid=340314545';
+// Data source URL - using environment variable for security
+const DATA_URL = import.meta.env.VITE_DATA_SOURCE_URL || 'https://api.example.com/data';
 
 // Fallback to local data
 const LOCAL_DATA_URL = '/pinnacle_events.csv';
@@ -16,19 +16,34 @@ function filterDataByDate(data) {
   });
 }
 
-export async function fetchSheetData() {
+// Obfuscated data fetching to hide source
+async function fetchFromSecureSource() {
   try {
-    // Fetch from primary data source
+    // Use a more generic error message to avoid revealing the source
     const response = await fetch(DATA_URL);
     if (response.ok) {
-      const csv = await response.text();
+      return await response.text();
+    }
+  } catch (error) {
+    // Generic error message that doesn't reveal the data source
+    console.warn('Data source temporarily unavailable');
+  }
+  return null;
+}
+
+// Additional obfuscation: wrap in a generic function name
+const getAnalyticsData = async () => {
+  try {
+    // Fetch from secure data source
+    const csv = await fetchFromSecureSource();
+    if (csv) {
       return new Promise((resolve, reject) => {
         Papa.parse(csv, {
           header: true,
           skipEmptyLines: true,
           complete: (results) => {
             const filteredData = filterDataByDate(results.data);
-            console.log(`Loaded ${filteredData.length} transactions after July 9th, 2025`);
+            console.log(`Analytics data loaded: ${filteredData.length} records`);
             resolve(filteredData);
           },
           error: reject,
@@ -36,7 +51,7 @@ export async function fetchSheetData() {
       });
     }
   } catch (error) {
-    console.warn('Could not fetch from primary source, trying fallback:', error);
+    console.warn('Primary analytics source unavailable, using fallback');
   }
   
   try {
@@ -50,7 +65,7 @@ export async function fetchSheetData() {
           skipEmptyLines: true,
           complete: (results) => {
             const filteredData = filterDataByDate(results.data);
-            console.log(`Loaded ${filteredData.length} transactions after July 9th, 2025`);
+            console.log(`Analytics data loaded: ${filteredData.length} records`);
             resolve(filteredData);
           },
           error: reject,
@@ -58,7 +73,7 @@ export async function fetchSheetData() {
       });
     }
   } catch (error) {
-    console.warn('Could not fetch data, using sample data:', error);
+    console.warn('Analytics data unavailable, using sample data');
   }
   
   // Final fallback: Return sample data structure
@@ -84,4 +99,7 @@ export async function fetchSheetData() {
       cursor: 'sample_cursor'
     }
   ];
-}
+};
+
+// Export with a generic name
+export const fetchSheetData = getAnalyticsData;
