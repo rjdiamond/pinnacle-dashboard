@@ -84,6 +84,11 @@ export default function RecentSalesTable({ data, fullData }) {
     return 'N/A';
   };
 
+  const formatWalletAddress = (address) => {
+    if (!address) return '';
+    return address;
+  };
+
   return (
     <div className="recent-sales-container">
       <h2>Recent Sales (Full Event)</h2>
@@ -116,10 +121,24 @@ export default function RecentSalesTable({ data, fullData }) {
                   {getTotalMinted(sale)}
                 </td>
                 <td className="buyer">
-                  {sale.receiver_username || 'Unknown'}
+                  <div className="user-info">
+                    <div className="username">
+                      {sale.receiver_username || 'Unknown'}
+                    </div>
+                    <div className="wallet-address">
+                      {formatWalletAddress(sale.receiver_flowAddress)}
+                    </div>
+                  </div>
                 </td>
                 <td className="seller">
-                  {sale.seller_username || 'Unknown'}
+                  <div className="user-info">
+                    <div className="username">
+                      {sale.seller_username || 'Unknown'}
+                    </div>
+                    <div className="wallet-address">
+                      {formatWalletAddress(sale.seller_flowAddress)}
+                    </div>
+                  </div>
                 </td>
                 <td className="pin-details">
                   <div className="pin-info">

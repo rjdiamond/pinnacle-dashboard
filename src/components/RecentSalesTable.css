@@ -93,6 +93,24 @@
   text-align: center;
 }
 
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.username {
+  font-weight: 500;
+  color: #374151;
+}
+
+.wallet-address {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
 .pin-details {
   max-width: 300px;
   text-align: center;
@@ -129,6 +147,10 @@
   
   .pin-details {
     max-width: 200px;
+  }
+  
+  .wallet-address {
+    font-size: 0.7rem;
   }
 }
 
