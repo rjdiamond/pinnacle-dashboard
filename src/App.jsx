@@ -11,6 +11,7 @@ import EditionSeriesPieChart from './components/EditionSeriesPieChart';
 import TopReceiversChart from './components/TopReceiversChart';
 import TopSellersChart from './components/TopSellersChart';
 import RecentSalesTable from './components/RecentSalesTable';
+import TopSalesTable from './components/TopSalesTable';
 import './App.css';
 
 function App() {
@@ -68,6 +69,12 @@ function App() {
         
         <div className="chart-container">
           <PinsSoldChart data={data} />
+        </div>
+      </div>
+      
+      <div className="charts-row">
+        <div className="chart-container">
+          <TopSalesTable data={data} fullData={fullData} />
         </div>
       </div>
       

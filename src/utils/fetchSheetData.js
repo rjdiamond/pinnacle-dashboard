@@ -6,8 +6,8 @@ const API_ENDPOINT = '/api/analytics-data';
 // Fallback to local data
 const LOCAL_DATA_URL = '/pinnacle_events.csv';
 
-// Filter date: July 9th, 2025
-const FILTER_DATE = new Date('2025-07-09T00:00:00.000Z');
+// Filter date: July 11th, 2025
+const FILTER_DATE = new Date('2025-07-11T00:00:00.000Z');
 
 function filterDataByDate(data) {
   return data.filter(row => {

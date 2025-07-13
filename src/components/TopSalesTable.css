@@ -1,0 +1,246 @@
+.top-sales-container {
+  width: 100%;
+}
+
+.top-sales-container h2 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.table-container {
+  max-height: 1000px;
+  overflow-y: auto;
+  border-radius: 8px;
+  border: 1px solid #e1e5e9;
+}
+
+.top-sales-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 0.9rem;
+}
+
+.top-sales-table thead {
+  background: linear-gradient(135deg, #FF6B35, #F7931E);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.top-sales-table th {
+  padding: 1rem 0.75rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.top-sales-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.top-sales-table tbody tr:hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+.top-sales-table tbody tr:nth-child(even) {
+  background-color: #fafbfc;
+}
+
+.top-sales-table tbody tr:nth-child(even):hover {
+  background-color: #f0f2f5;
+}
+
+/* Special styling for top 3 rows - 75% lighter */
+.top-sales-table tbody tr:nth-child(1) {
+  background: linear-gradient(135deg, #FFF7E6, #FFE6CC);
+  color: #333;
+}
+
+.top-sales-table tbody tr:nth-child(1):hover {
+  background: linear-gradient(135deg, #FFF9F0, #FFEBD6);
+}
+
+.top-sales-table tbody tr:nth-child(2) {
+  background: linear-gradient(135deg, #F5F5F5, #E8E8E8);
+  color: #333;
+}
+
+.top-sales-table tbody tr:nth-child(2):hover {
+  background: linear-gradient(135deg, #F8F8F8, #EBEBEB);
+}
+
+.top-sales-table tbody tr:nth-child(3) {
+  background: linear-gradient(135deg, #F4E6D7, #E8D4C4);
+  color: #333;
+}
+
+.top-sales-table tbody tr:nth-child(3):hover {
+  background: linear-gradient(135deg, #F7E9DB, #EBD7C7);
+}
+
+/* Rank column styling */
+.rank {
+  font-weight: 700;
+  text-align: center;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4A90E2, #8B5CF6);
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* Special rank badges for top 3 - 75% lighter */
+.top-sales-table tbody tr:nth-child(1) .rank-badge {
+  background: linear-gradient(135deg, #FFF7E6, #FFE6CC);
+  color: #333;
+  font-size: 1rem;
+}
+
+.top-sales-table tbody tr:nth-child(2) .rank-badge {
+  background: linear-gradient(135deg, #F5F5F5, #E8E8E8);
+  color: #333;
+  font-size: 1rem;
+}
+
+.top-sales-table tbody tr:nth-child(3) .rank-badge {
+  background: linear-gradient(135deg, #F4E6D7, #E8D4C4);
+  color: #333;
+  font-size: 1rem;
+}
+
+/* Column-specific styling */
+.timestamp {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.85rem;
+  color: #666;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.price {
+  font-weight: 700;
+  color: #10B981;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.avg-price {
+  font-weight: 500;
+  color: #8B5CF6;
+  font-size: 0.9rem;
+  font-style: italic;
+  text-align: center;
+}
+
+.total-minted {
+  font-weight: 600;
+  color: #F59E0B;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.buyer, .seller {
+  font-weight: 500;
+  color: #374151;
+  text-align: center;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.username {
+  font-weight: 500;
+  color: #374151;
+}
+
+.wallet-address {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.pin-details {
+  max-width: 300px;
+  text-align: center;
+}
+
+.pin-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.set-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.9rem;
+}
+
+.shape-variant {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .top-sales-table {
+    font-size: 0.8rem;
+  }
+  
+  .top-sales-table th,
+  .top-sales-table td {
+    padding: 0.5rem 0.5rem;
+  }
+  
+  .pin-details {
+    max-width: 200px;
+  }
+  
+  .wallet-address {
+    font-size: 0.7rem;
+  }
+  
+  .rank-badge {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Scrollbar styling */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+} 
