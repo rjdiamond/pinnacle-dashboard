@@ -39,7 +39,7 @@ This project is configured for deployment on Vercel.
 
 ## Data Source
 
-The dashboard connects to a secure data API that provides real-time marketplace transaction data. Data is filtered to show events from July 9th, 2025 onwards.
+The dashboard connects to a secure data API that provides real-time marketplace transaction data.
 
 ## License
 
