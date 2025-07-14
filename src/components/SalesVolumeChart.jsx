@@ -27,8 +27,8 @@ const EVENTS = {
     color: '#96CEB4' // Green
   },
   'Event V': {
-    startDate: new Date('2025-07-11T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PST
-    endDate: new Date('2025-07-15T06:59:59.999Z'),   // Jul 14, 2025 11:59 PM PST
+    startDate: new Date('2025-07-11T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PDT
+    endDate: new Date('2025-07-16T16:00:00.000Z'),   // Jul 16, 2025 9:00 AM PDT
     color: '#FFEAA7' // Yellow
   }
 };
@@ -187,7 +187,34 @@ export default function SalesVolumeChart({ data, selectedEvent, fullData }) {
           legend: { 
             display: selectedEvent === 'All',
             position: 'top'
-          } 
+          },
+          tooltip: {
+            callbacks: {
+              title: function(context) {
+                // Only for single event (hourly)
+                if (selectedEvent !== 'All') {
+                  // Get the original label (dateHour string)
+                  const idx = context[0].dataIndex;
+                  const labels = Object.keys(groupByHourSum(data, 'updated_at_block_time', 'price')).sort();
+                  const dateHourString = labels[idx]; // YYYY-MM-DDTHH
+                  const date = new Date(dateHourString + ':00:00.000Z');
+                  const pstDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
+                  const hour = pstDate.getHours();
+                  const ampm = hour >= 12 ? 'PM' : 'AM';
+                  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+                  const month = pstDate.toLocaleDateString('en-US', { month: 'short' });
+                  const day = pstDate.getDate();
+                  return `${month} ${day}, ${displayHour}${ampm}`;
+                }
+                // Default for daily view
+                return context[0].label;
+              },
+              label: function(context) {
+                // Show the value with $ for sales
+                return `Sales: $${context.parsed.y.toLocaleString()}`;
+              }
+            }
+          }
         },
         scales: { 
           x: { 
