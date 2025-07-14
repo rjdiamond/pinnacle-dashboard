@@ -6,14 +6,9 @@ const API_ENDPOINT = '/api/analytics-data';
 // Fallback to local data
 const LOCAL_DATA_URL = '/pinnacle_events.csv';
 
-// Filter date: July 11th, 2025
-const FILTER_DATE = new Date('2025-07-11T00:00:00.000Z');
-
+// No longer filtering by date here - handled in App component
 function filterDataByDate(data) {
-  return data.filter(row => {
-    const rowDate = new Date(row.updated_at_block_time);
-    return rowDate >= FILTER_DATE;
-  });
+  return data; // Return all data, filtering will be done in App component
 }
 
 // Secure data fetching that completely hides the source

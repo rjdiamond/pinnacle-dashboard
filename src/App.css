@@ -48,9 +48,80 @@ h1::after {
   font-size: 1.5rem;
 }
 
+/* Event Filter Buttons */
+.event-filter-container {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1rem 0 2rem 0;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.event-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid #4f8cff;
+  background: #fff;
+  color: #4f8cff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.event-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.event-button:hover::before {
+  left: 100%;
+}
+
+.event-button:hover {
+  background: #f0f4ff;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(79, 140, 255, 0.25);
+}
+
+.event-button.active {
+  background: #4f8cff;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(79, 140, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.event-button.active:hover {
+  background: #3d7ce8;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(79, 140, 255, 0.5);
+}
+
 h2 {
   color: #1a1a1a; /* Very dark text for all headings */
   font-weight: 600;
+}
+
+.event-subtitle {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  color: #4f8cff;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 /* Summary statistics */
@@ -93,6 +164,14 @@ h2 {
   margin: 2rem 0;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   min-width: 1600px;
+  transition: all 0.3s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.chart-container.loading {
+  opacity: 0.7;
+  transform: translateY(10px);
 }
 
 /* Responsive layout for larger screens */
