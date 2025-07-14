@@ -12,6 +12,8 @@ import TopReceiversChart from './components/TopReceiversChart';
 import TopSellersChart from './components/TopSellersChart';
 import RecentSalesTable from './components/RecentSalesTable';
 import TopSalesTable from './components/TopSalesTable';
+import TopBuyersByCount from './components/TopBuyersByCount';
+import TopSellersByCount from './components/TopSellersByCount';
 import './App.css';
 
 // Event date ranges (in PST)
@@ -42,9 +44,9 @@ const EVENTS = {
     title: 'Event IV (June 26th - 30th, 2025)'
   },
   'Event V': {
-    startDate: new Date('2025-07-11T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PST
-    endDate: new Date('2025-07-15T06:59:59.999Z'),   // Jul 14, 2025 11:59 PM PST
-    title: 'Event V (July 11th - 14th, 2025)'
+    startDate: new Date('2025-07-11T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PDT
+    endDate: new Date('2025-07-14T16:05:00.000Z'),   // Jul 14, 2025 9:05 AM PDT
+    title: 'Event V (July 11th – July 14th, 2025)'
   }
 };
 
@@ -59,18 +61,36 @@ function App() {
   const filterDataByEvent = (fullData, eventKey) => {
     const event = EVENTS[eventKey];
     if (!event.startDate || !event.endDate) {
-      return fullData; // Return all data if no date range is selected
+      return fullData;
     }
-    return fullData.filter(row => {
-      const rowDate = new Date(row.updated_at_block_time);
-      return rowDate >= event.startDate && rowDate <= event.endDate;
+    // Robust UTC filtering
+    const filtered = fullData.filter(row => {
+      const utcDate = new Date(row.updated_at_block_time);
+      return utcDate >= event.startDate && utcDate <= event.endDate;
     });
+    // Debug: log min/max timestamps for Event V
+    if (eventKey === 'Event V') {
+      const timestamps = filtered.map(row => row.updated_at_block_time).sort();
+      if (timestamps.length > 0) {
+        console.log('Event V UTC range:', timestamps[0], 'to', timestamps[timestamps.length - 1]);
+      } else {
+        console.log('Event V: No transactions found in UTC window');
+      }
+    }
+    return filtered;
   };
 
   useEffect(() => {
     fetchSheetData()
       .then(({ filteredData, fullData }) => {
         setFullData(fullData);
+        // Debug: log min/max timestamps in raw loaded data
+        const timestamps = fullData.map(row => row.updated_at_block_time).sort();
+        if (timestamps.length > 0) {
+          console.log('Raw data UTC range:', timestamps[0], 'to', timestamps[timestamps.length - 1]);
+        } else {
+          console.log('Raw data: No transactions found');
+        }
         // Initially filter for Event V (default)
         const eventFilteredData = filterDataByEvent(fullData, selectedEvent);
         setData(eventFilteredData);
@@ -218,7 +238,7 @@ function App() {
         </div>
         
         <div className="chart-container">
-          <EditionVariantPieChart data={data} />
+      <EditionVariantPieChart data={data} />
         </div>
         
         <div className="chart-container">
@@ -228,11 +248,20 @@ function App() {
       
       <div className="charts-row">
         <div className="chart-container">
-          <TopReceiversChart data={data} />
+      <TopReceiversChart data={data} />
         </div>
         
         <div className="chart-container">
-          <TopSellersChart data={data} />
+      <TopSellersChart data={data} />
+        </div>
+      </div>
+
+      <div className="charts-row">
+        <div className="chart-container">
+          <TopBuyersByCount data={data} />
+        </div>
+        <div className="chart-container">
+          <TopSellersByCount data={data} />
         </div>
       </div>
 
@@ -249,4 +278,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 
