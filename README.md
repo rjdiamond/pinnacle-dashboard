@@ -4,7 +4,7 @@ A real-time dashboard for tracking marketplace events and transactions.
 
 ## Features
 
-- **Real-time Data**: Updates every 15 minutes
+- **Real-time Data**: Updates every 5 minutes
 - **Sales Analytics**: Track sales volume and transaction patterns
 - **User Insights**: Top buyers and sellers analysis
 - **Product Analytics**: Edition and variant distribution
@@ -35,7 +35,7 @@ npm run preview
 
 ## Deployment
 
-This project is configured for deployment on Vercel. Simply connect your GitHub repository to Vercel for automatic deployments.
+This project is configured for deployment on Vercel.
 
 ## Data Source
 
