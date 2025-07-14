@@ -17,22 +17,6 @@ A real-time dashboard for tracking marketplace events and transactions.
 - Chart.js with react-chartjs-2
 - PapaParse for data processing
 
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
-```
-
 ## Deployment
 
 This project is configured for deployment on Vercel.
