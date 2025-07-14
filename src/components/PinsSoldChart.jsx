@@ -13,7 +13,7 @@ const EVENTS = {
   },
   'Event II': {
     startDate: new Date('2025-03-20T00:00:00.000Z'),
-    endDate: new Date('2025-03-23T23:59:59.999Z'),
+    endDate: new Date('2025-03-22T23:59:59.999Z'),
     color: '#4ECDC4' // Teal
   },
   'Event III': {

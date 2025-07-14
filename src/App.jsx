@@ -28,8 +28,8 @@ const EVENTS = {
   },
   'Event II': {
     startDate: new Date('2025-03-20T00:00:00.000Z'),
-    endDate: new Date('2025-03-23T23:59:59.999Z'),
-    title: 'Event II (March 20th - 23rd, 2025)'
+    endDate: new Date('2025-03-22T23:59:59.999Z'),
+    title: 'Event II (March 20th - 22nd, 2025)'
   },
   'Event III': {
     startDate: new Date('2025-05-16T00:00:00.000Z'),
