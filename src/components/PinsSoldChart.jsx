@@ -4,31 +4,31 @@ import { Chart, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from '
 
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-// Event date ranges for color coding
+// Event date ranges for color coding (in PST)
 const EVENTS = {
   'Event I': {
-    startDate: new Date('2024-12-19T00:00:00.000Z'),
-    endDate: new Date('2024-12-23T23:59:59.999Z'),
+    startDate: new Date('2024-12-19T17:00:00.000Z'), // Dec 19, 2024 9:00 AM PST
+    endDate: new Date('2024-12-24T07:59:59.999Z'),   // Dec 23, 2024 11:59 PM PST
     color: '#FF6B6B' // Red
   },
   'Event II': {
-    startDate: new Date('2025-03-20T00:00:00.000Z'),
-    endDate: new Date('2025-03-22T23:59:59.999Z'),
+    startDate: new Date('2025-03-20T17:00:00.000Z'), // Mar 20, 2025 9:00 AM PST
+    endDate: new Date('2025-03-24T07:59:59.999Z'),   // Mar 23, 2025 11:59 PM PST
     color: '#4ECDC4' // Teal
   },
   'Event III': {
-    startDate: new Date('2025-05-16T00:00:00.000Z'),
-    endDate: new Date('2025-05-19T23:59:59.999Z'),
+    startDate: new Date('2025-05-16T17:00:00.000Z'), // May 16, 2025 9:00 AM PST
+    endDate: new Date('2025-05-20T07:59:59.999Z'),   // May 19, 2025 11:59 PM PST
     color: '#45B7D1' // Blue
   },
   'Event IV': {
-    startDate: new Date('2025-06-26T00:00:00.000Z'),
-    endDate: new Date('2025-06-30T23:59:59.999Z'),
+    startDate: new Date('2025-06-26T17:00:00.000Z'), // Jun 26, 2025 9:00 AM PST
+    endDate: new Date('2025-07-01T07:59:59.999Z'),   // Jun 30, 2025 11:59 PM PST
     color: '#96CEB4' // Green
   },
   'Event V': {
-    startDate: new Date('2025-07-11T00:00:00.000Z'),
-    endDate: new Date('2025-07-14T23:59:59.999Z'),
+    startDate: new Date('2025-07-11T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PST
+    endDate: new Date('2025-07-15T06:59:59.999Z'),   // Jul 14, 2025 11:59 PM PST
     color: '#FFEAA7' // Yellow
   }
 };
@@ -73,6 +73,9 @@ function groupByDayCountByEvent(data, dateKey) {
     result[eventKey] = {};
   });
   
+  // Add "Other Sales" category for data outside events
+  result['Other Sales'] = {};
+  
   data.forEach(row => {
     const dateTime = row[dateKey];
     if (!dateTime) return;
@@ -80,20 +83,24 @@ function groupByDayCountByEvent(data, dateKey) {
     const rowDate = new Date(dateTime);
     let eventKey = null;
     
-    // Determine which event this row belongs to
+    // Determine which event this row belongs to (with 1-day buffer)
     for (const [key, event] of Object.entries(EVENTS)) {
-      if (rowDate >= event.startDate && rowDate <= event.endDate) {
+      const bufferStart = new Date(event.startDate.getTime() - 24 * 60 * 60 * 1000); // 1 day before
+      const bufferEnd = new Date(event.endDate.getTime() + 24 * 60 * 60 * 1000); // 1 day after
+      
+      if (rowDate >= bufferStart && rowDate <= bufferEnd) {
         eventKey = key;
         break;
       }
     }
     
-    if (!eventKey) return; // Skip if not in any event
+    // If not in any event (including buffers), categorize as "Other Sales"
+    if (!eventKey) {
+      eventKey = 'Other Sales';
+    }
     
-    // Convert to PST and extract day
-    const utcDate = new Date(dateTime);
-    const pstDate = new Date(utcDate.toLocaleString("en-US", {timeZone: "America/Los_Angeles"}));
-    const dateDay = pstDate.toISOString().slice(0, 10); // YYYY-MM-DD
+    // Use original timestamp without PST conversion for "All" view
+    const dateDay = rowDate.toISOString().slice(0, 10); // YYYY-MM-DD
     
     if (!result[eventKey][dateDay]) result[eventKey][dateDay] = 0;
     result[eventKey][dateDay] += 1;
@@ -113,9 +120,8 @@ function formatTimeLabel(dateHourString) {
 
 function formatDayLabel(dateDayString) {
   const date = new Date(dateDayString + 'T00:00:00.000Z');
-  const pstDate = new Date(date.toLocaleString("en-US", {timeZone: "America/Los_Angeles"}));
-  const month = pstDate.toLocaleDateString('en-US', { month: 'short' });
-  const day = pstDate.getDate();
+  const month = date.toLocaleDateString('en-US', { month: 'short' });
+  const day = date.getDate();
   return `${month} ${day}`;
 }
 
@@ -140,8 +146,8 @@ export default function PinsSoldChart({ data, selectedEvent, fullData }) {
       return {
         label: eventKey,
         data: values,
-        backgroundColor: EVENTS[eventKey].color,
-        borderColor: EVENTS[eventKey].color,
+        backgroundColor: eventKey === 'Other Sales' ? '#E0E0E0' : EVENTS[eventKey].color,
+        borderColor: eventKey === 'Other Sales' ? '#B0B0B0' : EVENTS[eventKey].color,
         borderWidth: 1,
       };
     });
@@ -171,7 +177,7 @@ export default function PinsSoldChart({ data, selectedEvent, fullData }) {
 
   return (
     <div style={{ margin: '2rem 0' }}>
-      <h2>Pins Sold by {selectedEvent === 'All' ? 'Day' : 'Hour'} (PST)</h2>
+      <h2>Pins Sold by {selectedEvent === 'All' ? 'Day' : 'Hour'} {selectedEvent === 'All' ? '' : '(PST)'}</h2>
       <Bar data={chartData} options={{
         responsive: true,
         plugins: { 
@@ -184,7 +190,7 @@ export default function PinsSoldChart({ data, selectedEvent, fullData }) {
           x: { 
             title: { 
               display: true, 
-              text: selectedEvent === 'All' ? 'Date (PST)' : 'Time (PST)' 
+              text: selectedEvent === 'All' ? 'Date' : 'Time (PST)' 
             } 
           }, 
           y: { 

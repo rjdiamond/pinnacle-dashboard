@@ -14,7 +14,7 @@ import RecentSalesTable from './components/RecentSalesTable';
 import TopSalesTable from './components/TopSalesTable';
 import './App.css';
 
-// Event date ranges
+// Event date ranges (in PST)
 const EVENTS = {
   'All': {
     startDate: null,
@@ -22,28 +22,28 @@ const EVENTS = {
     title: 'All Events (Complete History)'
   },
   'Event I': {
-    startDate: new Date('2024-12-19T00:00:00.000Z'),
-    endDate: new Date('2024-12-23T23:59:59.999Z'),
+    startDate: new Date('2024-12-19T17:00:00.000Z'), // Dec 19, 2024 9:00 AM PST
+    endDate: new Date('2024-12-24T07:59:59.999Z'),   // Dec 23, 2024 11:59 PM PST
     title: 'Event I (December 19th - 23rd, 2024)'
   },
   'Event II': {
-    startDate: new Date('2025-03-20T00:00:00.000Z'),
-    endDate: new Date('2025-03-22T23:59:59.999Z'),
-    title: 'Event II (March 20th - 22nd, 2025)'
+    startDate: new Date('2025-03-20T17:00:00.000Z'), // Mar 20, 2025 9:00 AM PST
+    endDate: new Date('2025-03-24T07:59:59.999Z'),   // Mar 23, 2025 11:59 PM PST
+    title: 'Event II (March 20th - 23rd, 2025)'
   },
   'Event III': {
-    startDate: new Date('2025-05-16T00:00:00.000Z'),
-    endDate: new Date('2025-05-19T23:59:59.999Z'),
+    startDate: new Date('2025-05-16T17:00:00.000Z'), // May 16, 2025 9:00 AM PST
+    endDate: new Date('2025-05-20T07:59:59.999Z'),   // May 19, 2025 11:59 PM PST
     title: 'Event III (May 16th - 19th, 2025)'
   },
   'Event IV': {
-    startDate: new Date('2025-06-26T00:00:00.000Z'),
-    endDate: new Date('2025-06-30T23:59:59.999Z'),
+    startDate: new Date('2025-06-26T17:00:00.000Z'), // Jun 26, 2025 9:00 AM PST
+    endDate: new Date('2025-07-01T07:59:59.999Z'),   // Jun 30, 2025 11:59 PM PST
     title: 'Event IV (June 26th - 30th, 2025)'
   },
   'Event V': {
-    startDate: new Date('2025-07-11T00:00:00.000Z'),
-    endDate: new Date('2025-07-14T23:59:59.999Z'),
+    startDate: new Date('2025-07-11T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PST
+    endDate: new Date('2025-07-15T06:59:59.999Z'),   // Jul 14, 2025 11:59 PM PST
     title: 'Event V (July 11th - 14th, 2025)'
   }
 };
