@@ -89,8 +89,8 @@ export default function TopReceiversChart({ data }) {
     }}>
       <h2>Top 15 Buyers by Spend</h2>
       <div style={{ width: '100%', height: '500px' }}>
-        <Bar data={chartData} options={{
-          responsive: true,
+      <Bar data={chartData} options={{
+        responsive: true,
           maintainAspectRatio: false,
           plugins: { 
             legend: { display: false },
@@ -134,7 +134,7 @@ export default function TopReceiversChart({ data }) {
               }
             }
           },
-          indexAxis: 'y',
+        indexAxis: 'y',
           scales: { 
             x: { 
               title: { display: true, text: 'Total Spend ($)' },
@@ -144,7 +144,7 @@ export default function TopReceiversChart({ data }) {
               title: { display: true, text: 'Buyer' } 
             } 
           }
-        }} />
+      }} />
       </div>
     </div>
   );

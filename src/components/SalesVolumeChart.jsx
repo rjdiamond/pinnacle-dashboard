@@ -162,20 +162,20 @@ export default function SalesVolumeChart({ data, selectedEvent, fullData }) {
   } else {
     // Single event - use original logic
     const grouped = groupByHourSum(data, 'updated_at_block_time', 'price');
-    const labels = Object.keys(grouped).sort();
+  const labels = Object.keys(grouped).sort();
     const values = labels.map(hour => grouped[hour]);
     const formattedLabels = labels.map(label => formatTimeLabel(label));
 
     chartData = {
       labels: formattedLabels,
-      datasets: [
-        {
-          label: 'Total Sales Volume',
-          data: values,
-          backgroundColor: '#4f8cff',
-        },
-      ],
-    };
+    datasets: [
+      {
+        label: 'Total Sales Volume',
+        data: values,
+        backgroundColor: '#4f8cff',
+      },
+    ],
+  };
   }
 
   return (

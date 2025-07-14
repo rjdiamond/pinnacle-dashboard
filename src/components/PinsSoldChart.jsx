@@ -159,20 +159,20 @@ export default function PinsSoldChart({ data, selectedEvent, fullData }) {
   } else {
     // Single event - use original logic
     const grouped = groupByHourCount(data, 'updated_at_block_time');
-    const labels = Object.keys(grouped).sort();
+  const labels = Object.keys(grouped).sort();
     const values = labels.map(hour => grouped[hour]);
     const formattedLabels = labels.map(label => formatTimeLabel(label));
 
     chartData = {
       labels: formattedLabels,
-      datasets: [
-        {
-          label: 'Pins Sold',
-          data: values,
-          backgroundColor: '#ffb347',
-        },
-      ],
-    };
+    datasets: [
+      {
+        label: 'Pins Sold',
+        data: values,
+        backgroundColor: '#ffb347',
+      },
+    ],
+  };
   }
 
   return (

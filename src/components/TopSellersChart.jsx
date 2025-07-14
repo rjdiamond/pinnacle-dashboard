@@ -93,8 +93,8 @@ export default function TopSellersChart({ data }) {
     }}>
       <h2>Top 15 Sellers by Sales</h2>
       <div style={{ width: '100%', height: '500px' }}>
-        <Bar data={chartData} options={{
-          responsive: true,
+      <Bar data={chartData} options={{
+        responsive: true,
           maintainAspectRatio: false,
           plugins: { 
             legend: { display: false },
@@ -140,7 +140,7 @@ export default function TopSellersChart({ data }) {
               }
             }
           },
-          indexAxis: 'y',
+        indexAxis: 'y',
           scales: { 
             x: { 
               title: { display: true, text: 'Total Sales ($)' },
@@ -150,7 +150,7 @@ export default function TopSellersChart({ data }) {
               title: { display: true, text: 'Seller' } 
             } 
           }
-        }} />
+      }} />
       </div>
     </div>
   );

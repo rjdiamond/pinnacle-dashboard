@@ -54,8 +54,8 @@ export default function EditionVariantPieChart({ data }) {
         justifyContent: 'center',
         margin: '0 auto'
       }}>
-        <Pie data={chartData} options={{
-          responsive: true,
+      <Pie data={chartData} options={{
+        responsive: true,
           maintainAspectRatio: false,
           plugins: { 
             legend: { 
@@ -67,7 +67,7 @@ export default function EditionVariantPieChart({ data }) {
               }
             } 
           },
-        }} />
+      }} />
       </div>
     </div>
   );

@@ -102,6 +102,10 @@ function App() {
   const totalTransactions = data.length;
   const totalSales = data.reduce((sum, row) => sum + (parseFloat(row.price) || 0), 0);
   const totalCommission = data.reduce((sum, row) => sum + (parseFloat(row.commission_amount) || 0), 0);
+  
+  // Calculate unique buyers and sellers
+  const uniqueBuyers = new Set(data.map(row => row.receiver_username).filter(Boolean));
+  const uniqueSellers = new Set(data.map(row => row.seller_username).filter(Boolean));
 
   return (
     <div className="dashboard-container">
@@ -153,18 +157,28 @@ function App() {
       
       <div className="summary-stats">
         <div className="stat-card">
-          <div className="stat-number">{totalTransactions.toLocaleString()}</div>
+          <div className="stat-number" style={{ color: '#2196F3' }}>{totalTransactions.toLocaleString()}</div>
           <div className="stat-label">Total Transactions</div>
         </div>
         
         <div className="stat-card">
-          <div className="stat-number">${totalSales.toLocaleString()}</div>
+          <div className="stat-number" style={{ color: '#2196F3' }}>${totalSales.toLocaleString()}</div>
           <div className="stat-label">Total Sales</div>
         </div>
         
         <div className="stat-card">
-          <div className="stat-number">${totalCommission.toLocaleString()}</div>
+          <div className="stat-number" style={{ color: '#2196F3' }}>${totalCommission.toLocaleString()}</div>
           <div className="stat-label">Total Commission</div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-number" style={{ color: '#4CAF50' }}>{uniqueBuyers.size.toLocaleString()}</div>
+          <div className="stat-label">Unique Buyers</div>
+        </div>
+        
+        <div className="stat-card">
+          <div className="stat-number" style={{ color: '#4CAF50' }}>{uniqueSellers.size.toLocaleString()}</div>
+          <div className="stat-label">Unique Sellers</div>
         </div>
       </div>
       
