@@ -99,12 +99,21 @@ export default function TopSalesTable({ data, fullData }) {
     return address;
   };
 
-  const getSerialNumber = (sale) => {
-    if (sale.nft_serial_number !== null && sale.nft_serial_number !== undefined) {
-      return `#${sale.nft_serial_number}`;
-    }
-    return '-';
-  };
+const getSerialNumber = (sale) => {
+  const serial = sale.nft_serial_number || sale.serial_number;
+
+  if (
+    serial !== undefined &&
+    serial !== null &&
+    serial !== '' &&
+    serial !== 'null' &&
+    serial !== 'undefined'
+  ) {
+    return `#${serial}`;
+  }
+
+  return '-';
+};
 
   return (
     <div className="top-sales-container">
