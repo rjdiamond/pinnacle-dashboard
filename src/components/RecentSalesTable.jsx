@@ -104,7 +104,7 @@ export default function RecentSalesTable({ data, fullData }) {
       return `#${serial}`;
     }
   
-    return 'N/A';
+    return '-';
   };
   
   React.useEffect(() => {
