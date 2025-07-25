@@ -90,3 +90,8 @@ button:focus-visible {
 .live-button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+
+.auto-refresh-toggle {
+  font-size: 0.95rem;
+  color: #333;
+}
