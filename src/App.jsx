@@ -146,7 +146,7 @@ function App() {
       <h1>Disney Pinnacle Marketplace Events</h1>
       <h2 className="event-subtitle">{EVENTS[selectedEvent].title}</h2>
       <p style={{ textAlign: 'center', color: '#666', marginBottom: '0.5rem', fontSize: '1rem' }}>
-        Data Updates Every 5 Minutes
+        Data Auto-Refreshes During Live Events
       </p>
       
       {/* Event Filter Buttons */}
@@ -221,6 +221,12 @@ function App() {
           <div className="stat-label">Unique Sellers</div>
         </div>
       </div>
+
+      <div className="charts-row">
+      <div className="chart-container">
+          <RecentSalesTable data={data} fullData={fullData} />
+        </div>
+      </div>
       
       <div className="charts-row">
         <div className="chart-container">
@@ -282,12 +288,6 @@ function App() {
         </div>
         <div className="chart-container">
           <TopSellersByCount data={data} />
-        </div>
-      </div>
-
-      <div className="charts-row">
-        <div className="chart-container">
-          <RecentSalesTable data={data} fullData={fullData} />
         </div>
       </div>
       
