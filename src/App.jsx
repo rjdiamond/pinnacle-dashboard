@@ -61,6 +61,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState('Event VI - Live');
+  const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Filter data based on selected event
   const filterDataByEvent = (fullData, eventKey) => {
@@ -90,16 +91,15 @@ function App() {
   
     let interval;
   
-    if (selectedEvent === 'Event VI - Live') {
+    if (selectedEvent === 'Event VI - Live' && autoRefresh) {
       interval = setInterval(() => {
         console.log('[Live] Auto-refreshing...');
         loadData();
       }, 15000); // every 15 seconds
     }
   
-    return () => clearInterval(interval); // Clean up when event changes
-  }, [selectedEvent]);
-  
+    return () => clearInterval(interval);
+  }, [selectedEvent, autoRefresh]);
 
   const loadData = () => {
     fetchSheetData()
@@ -194,6 +194,19 @@ function App() {
           Event VI - Live
         </button>
       </div>
+      
+{selectedEvent === 'Event VI - Live' && (
+  <div className="auto-refresh-toggle" style={{ textAlign: 'center', marginTop: '1rem' }}>
+    <label>
+      <input
+        type="checkbox"
+        checked={autoRefresh}
+        onChange={() => setAutoRefresh(prev => !prev)}
+      />{' '}
+      Auto-refresh every 15 seconds
+    </label>
+  </div>
+)}
       
       <div className="summary-stats">
         <div className="stat-card">
