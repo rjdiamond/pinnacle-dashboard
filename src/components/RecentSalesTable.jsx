@@ -90,6 +90,28 @@ export default function RecentSalesTable({ data, fullData }) {
     return address;
   };
 
+  const getSerialNumber = (sale) => {
+    const serial = sale.nft_serial_number || sale.serial_number;
+  
+    // Handle valid numbers and strings
+    if (
+      serial !== undefined &&
+      serial !== null &&
+      serial !== '' &&
+      serial !== 'null' &&
+      serial !== 'undefined'
+    ) {
+      return `#${serial}`;
+    }
+  
+    return 'N/A';
+  };
+  
+  React.useEffect(() => {
+    console.log('Sample serials:', data.slice(0, 5).map(s => s.nft_serial_number));
+  }, [data]);
+
+  
   return (
     <div className="recent-sales-container">
       <h2>Recent Sales (Full Event)</h2>
@@ -101,6 +123,7 @@ export default function RecentSalesTable({ data, fullData }) {
               <th>Price</th>
               <th>Average Price (All Events)</th>
               <th>Total Minted</th>
+              <th>Serial #</th> 
               <th>Buyer</th>
               <th>Seller</th>
               <th>Pin Details</th>
@@ -120,6 +143,9 @@ export default function RecentSalesTable({ data, fullData }) {
                 </td>
                 <td className="total-minted">
                   {getTotalMinted(sale)}
+                </td>
+                <td className="serial-number">
+                  {getSerialNumber(sale)}
                 </td>
                 <td className="buyer">
                   <div className="user-info">

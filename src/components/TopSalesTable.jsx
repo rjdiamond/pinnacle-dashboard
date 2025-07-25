@@ -99,6 +99,13 @@ export default function TopSalesTable({ data, fullData }) {
     return address;
   };
 
+  const getSerialNumber = (sale) => {
+    if (sale.nft_serial_number !== null && sale.nft_serial_number !== undefined) {
+      return `#${sale.nft_serial_number}`;
+    }
+    return 'N/A';
+  };
+
   return (
     <div className="top-sales-container">
       <h2>Top Sales (Full Event)</h2>
@@ -110,6 +117,7 @@ export default function TopSalesTable({ data, fullData }) {
               <th>Price</th>
               <th>Average Price (All Events)</th>
               <th>Total Minted</th>
+              <th>Serial #</th> 
               <th>Buyer</th>
               <th>Seller</th>
               <th>Pin Details</th>
@@ -132,6 +140,9 @@ export default function TopSalesTable({ data, fullData }) {
                 </td>
                 <td className="total-minted">
                   {getTotalMinted(sale)}
+                </td>
+                <td className="serial-number">
+                  {getSerialNumber(sale)}
                 </td>
                 <td className="buyer">
                   <div className="user-info">

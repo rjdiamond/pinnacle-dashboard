@@ -8,27 +8,27 @@ Chart.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 const EVENTS = {
   'Event I': {
     startDate: new Date('2024-12-19T17:00:00.000Z'), // Dec 19, 2024 9:00 AM PST
-    endDate: new Date('2024-12-24T07:59:59.999Z'),   // Dec 23, 2024 11:59 PM PST
+    endDate: new Date('2024-12-23T17:15:00.000Z'),   // Dec 23, 2024 9:00 AM PST
     color: '#FF6B6B' // Red
   },
   'Event II': {
-    startDate: new Date('2025-03-20T17:00:00.000Z'), // Mar 20, 2025 9:00 AM PST
-    endDate: new Date('2025-03-24T07:59:59.999Z'),   // Mar 23, 2025 11:59 PM PST
+    startDate: new Date('2025-03-21T17:00:00.000Z'), // Mar 20, 2025 9:00 AM PST
+    endDate: new Date('2025-03-24T17:15:00.000Z'),   // Mar 23, 2025 11:59 PM PST
     color: '#4ECDC4' // Teal
   },
   'Event III': {
     startDate: new Date('2025-05-16T17:00:00.000Z'), // May 16, 2025 9:00 AM PST
-    endDate: new Date('2025-05-20T07:59:59.999Z'),   // May 19, 2025 11:59 PM PST
+    endDate: new Date('2025-05-20T17:15:00.000Z'),   // May 19, 2025 11:59 PM PST
     color: '#45B7D1' // Blue
   },
   'Event IV': {
     startDate: new Date('2025-06-26T17:00:00.000Z'), // Jun 26, 2025 9:00 AM PST
-    endDate: new Date('2025-07-01T07:59:59.999Z'),   // Jun 30, 2025 11:59 PM PST
+    endDate: new Date('2025-07-01T17:15:00.000Z'),   // Jun 30, 2025 11:59 PM PST
     color: '#96CEB4' // Green
   },
   'Event V': {
     startDate: new Date('2025-07-11T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PDT
-    endDate: new Date('2025-07-16T16:00:00.000Z'),   // Jul 16, 2025 9:00 AM PDT
+    endDate: new Date('2025-07-16T17:15:00.000Z'),   // Jul 16, 2025 9:00 AM PDT
     color: '#FFEAA7' // Yellow
   }
 };
