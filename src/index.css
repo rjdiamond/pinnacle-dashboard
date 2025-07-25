@@ -92,6 +92,6 @@ button:focus-visible {
 }
 
 .auto-refresh-toggle {
-  font-size: 0.95rem;
-  color: #333;
+  font-size: 1rem;
+  color: #666;
 }
