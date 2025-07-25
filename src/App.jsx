@@ -88,13 +88,18 @@ function App() {
   useEffect(() => {
     loadData(); // Initial load
   
-    const interval = setInterval(() => {
-      console.log('Refreshing data...');
-      loadData();
-    }, 30000); // every 30 seconds
+    let interval;
   
-    return () => clearInterval(interval); // Clean up on unmount
+    if (selectedEvent === 'Event VI - Live') {
+      interval = setInterval(() => {
+        console.log('[Live] Auto-refreshing...');
+        loadData();
+      }, 15000); // every 15 seconds
+    }
+  
+    return () => clearInterval(interval); // Clean up when event changes
   }, [selectedEvent]);
+  
 
   const loadData = () => {
     fetchSheetData()
@@ -113,14 +118,14 @@ function App() {
     if (eventKey === selectedEvent) return; // Prevent unnecessary re-renders
     
     // Add loading state for smooth transition
-    setLoading(true);
+ //   setLoading(true);
     
     // Small delay to show transition
     setTimeout(() => {
       setSelectedEvent(eventKey);
       const eventFilteredData = filterDataByEvent(fullData, eventKey);
       setData(eventFilteredData);
-      setLoading(false);
+ //     setLoading(false);
     }, 150);
   };
 
