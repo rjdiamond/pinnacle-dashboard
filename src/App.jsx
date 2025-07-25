@@ -25,28 +25,33 @@ const EVENTS = {
   },
   'Event I': {
     startDate: new Date('2024-12-19T17:00:00.000Z'), // Dec 19, 2024 9:00 AM PST
-    endDate: new Date('2024-12-24T07:59:59.999Z'),   // Dec 23, 2024 11:59 PM PST
+    endDate: new Date('2024-12-23T17:15:00.000Z'),   // Dec 23, 2024 9:00 AM PST
     title: 'Event I (December 19th - 23rd, 2024)'
   },
   'Event II': {
-    startDate: new Date('2025-03-20T17:00:00.000Z'), // Mar 20, 2025 9:00 AM PST
-    endDate: new Date('2025-03-24T07:59:59.999Z'),   // Mar 23, 2025 11:59 PM PST
+    startDate: new Date('2025-03-21T16:00:00.000Z'), // Mar 20, 2025 9:00 AM PST
+    endDate: new Date('2025-03-24T17:15:00.000Z'),   // Mar 23, 2025 11:59 PM PST
     title: 'Event II (March 20th - 23rd, 2025)'
   },
   'Event III': {
-    startDate: new Date('2025-05-16T17:00:00.000Z'), // May 16, 2025 9:00 AM PST
-    endDate: new Date('2025-05-20T07:59:59.999Z'),   // May 19, 2025 11:59 PM PST
+    startDate: new Date('2025-05-16T16:00:00.000Z'), // May 16, 2025 9:00 AM PST
+    endDate: new Date('2025-05-20T17:15:00.000Z'),   // May 19, 2025 11:59 PM PST
     title: 'Event III (May 16th - 19th, 2025)'
   },
   'Event IV': {
-    startDate: new Date('2025-06-26T17:00:00.000Z'), // Jun 26, 2025 9:00 AM PST
-    endDate: new Date('2025-07-01T07:59:59.999Z'),   // Jun 30, 2025 11:59 PM PST
+    startDate: new Date('2025-06-26T16:00:00.000Z'), // Jun 26, 2025 9:00 AM PST
+    endDate: new Date('2025-07-01T17:15:00.000Z'),   // Jun 30, 2025 11:59 PM PST
     title: 'Event IV (June 26th - 30th, 2025)'
   },
   'Event V': {
     startDate: new Date('2025-07-11T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PDT
-    endDate: new Date('2025-07-14T16:05:00.000Z'),   // Jul 14, 2025 9:05 AM PDT
+    endDate: new Date('2025-07-14T17:15:00.000Z'),   // Jul 14, 2025 9:05 AM PDT
     title: 'Event V (July 11th – July 14th, 2025)'
+  },
+  'Event VI - Live': {
+    startDate: new Date('2025-07-25T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PDT
+    endDate: new Date('2025-07-28T17:15:00.000Z'),   // Jul 14, 2025 9:05 AM PDT
+    title: 'Event VI (July 25th – July 28th, 2025)'
   }
 };
 
@@ -55,7 +60,7 @@ function App() {
   const [fullData, setFullData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState('Event V');
+  const [selectedEvent, setSelectedEvent] = useState('Event VI - Live');
 
   // Filter data based on selected event
   const filterDataByEvent = (fullData, eventKey) => {
@@ -81,23 +86,27 @@ function App() {
   };
 
   useEffect(() => {
+    loadData(); // Initial load
+  
+    const interval = setInterval(() => {
+      console.log('Refreshing data...');
+      loadData();
+    }, 30000); // every 30 seconds
+  
+    return () => clearInterval(interval); // Clean up on unmount
+  }, [selectedEvent]);
+
+  const loadData = () => {
     fetchSheetData()
       .then(({ filteredData, fullData }) => {
         setFullData(fullData);
-        // Debug: log min/max timestamps in raw loaded data
-        const timestamps = fullData.map(row => row.updated_at_block_time).sort();
-        if (timestamps.length > 0) {
-          console.log('Raw data UTC range:', timestamps[0], 'to', timestamps[timestamps.length - 1]);
-        } else {
-          console.log('Raw data: No transactions found');
-        }
-        // Initially filter for Event V (default)
         const eventFilteredData = filterDataByEvent(fullData, selectedEvent);
         setData(eventFilteredData);
       })
       .catch((err) => setError(err.message || 'Error loading data'))
       .finally(() => setLoading(false));
-  }, []);
+  };
+  
 
   // Handle event selection with smooth transitions
   const handleEventChange = (eventKey) => {
@@ -137,6 +146,12 @@ function App() {
       
       {/* Event Filter Buttons */}
       <div className="event-filter-container">
+      <button 
+          className={`event-button ${selectedEvent === 'All' ? 'active' : ''}`}
+          onClick={() => handleEventChange('All')}
+        >
+          All
+        </button>
         <button 
           className={`event-button ${selectedEvent === 'Event I' ? 'active' : ''}`}
           onClick={() => handleEventChange('Event I')}
@@ -168,10 +183,10 @@ function App() {
           Event V
         </button>
         <button 
-          className={`event-button ${selectedEvent === 'All' ? 'active' : ''}`}
-          onClick={() => handleEventChange('All')}
+          className={`live-button ${selectedEvent === 'Event VI - Live' ? 'active' : ''}`}
+          onClick={() => handleEventChange('Event VI - Live')}
         >
-          All
+          Event VI - Live
         </button>
       </div>
       
