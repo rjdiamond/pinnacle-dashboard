@@ -103,7 +103,7 @@ export default function TopSalesTable({ data, fullData }) {
     if (sale.nft_serial_number !== null && sale.nft_serial_number !== undefined) {
       return `#${sale.nft_serial_number}`;
     }
-    return 'N/A';
+    return '-';
   };
 
   return (
