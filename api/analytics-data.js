@@ -1,7 +1,7 @@
 // Vercel serverless function to proxy Google Sheets data
 // This runs server-side and completely hides the data source from the client
 
-const GOOGLE_SHEETS_URL = process.env.GOOGLE_SHEETS_URL || 'https://docs.google.com/spreadsheets/d/1Qb1NpuQi9_KMPhi7NpZ_9xhJW8xXP8_VCaV-ffM5tAE/export?format=csv&gid=340314545';
+const GOOGLE_SHEETS_URL = process.env.GOOGLE_SHEETS_URL || 'https://docs.google.com/spreadsheets/d/1Qb1NpuQi9_KMPhi7NpZ_9xhJW8xXP8_VCaV-ffM5tAE/export?format=csv&gid=1069134817';
 
 export default async function handler(req, res) {
   // Set CORS headers
