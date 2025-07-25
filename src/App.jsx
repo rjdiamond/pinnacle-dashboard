@@ -227,6 +227,12 @@ function App() {
           <RecentSalesTable data={data} fullData={fullData} />
         </div>
       </div>
+
+      <div className="charts-row">
+      <div className="chart-container">
+          <TopSalesTable data={data} fullData={fullData} />
+      </div>
+      </div>
       
       <div className="charts-row">
         <div className="chart-container">
@@ -235,12 +241,6 @@ function App() {
         
         <div className="chart-container">
           <PinsSoldChart data={data} selectedEvent={selectedEvent} fullData={fullData} />
-        </div>
-      </div>
-      
-      <div className="charts-row">
-        <div className="chart-container">
-          <TopSalesTable data={data} fullData={fullData} />
         </div>
       </div>
       
