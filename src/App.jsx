@@ -157,7 +157,7 @@ function App() {
     if (selectedEvent === "Event VI - Live") {
       interval = setInterval(() => {
         loadDataBackground();
-      }, 15000);
+      }, 60000);
     }
     return () => clearInterval(interval);
     // eslint-disable-next-line
