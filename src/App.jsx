@@ -61,6 +61,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState('Event VI - Live');
+  const [lastTimestamp, setLastTimestamp] = useState(null);
 //  const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Filter data based on selected event
@@ -112,7 +113,53 @@ function App() {
       .finally(() => setLoading(false));
   };
   
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const newRows = await fetchSheetData(lastTimestamp);
 
+      let mergedFullData;
+      if (lastTimestamp && newRows.length > 0) {
+        mergedFullData = [...fullData, ...newRows];
+      } else if (!lastTimestamp) {
+        mergedFullData = newRows; // initial load
+      } else {
+        mergedFullData = fullData; // no new data
+      }
+      setFullData(mergedFullData);
+
+      // Update last timestamp
+      if (mergedFullData.length > 0) {
+        // Find the max timestamp
+        const maxTimestamp = mergedFullData.reduce((max, row) => {
+          const ts = row.updated_at_block_time;
+          return ts > max ? ts : max;
+        }, mergedFullData[0].updated_at_block_time);
+        setLastTimestamp(maxTimestamp);
+      }
+
+      const eventFilteredData = filterDataByEvent(mergedFullData, selectedEvent);
+      setData(eventFilteredData);
+    } catch (err) {
+      setError(err.message || "Error loading data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData(); // Initial load
+
+    let interval;
+    if (selectedEvent === "Event VI - Live") {
+      interval = setInterval(() => {
+        loadData();
+      }, 15000); // every 15 seconds
+    }
+    return () => clearInterval(interval);
+    // eslint-disable-next-line
+  }, [selectedEvent]);
+  
   // Handle event selection with smooth transitions
   const handleEventChange = (eventKey) => {
     if (eventKey === selectedEvent) return; // Prevent unnecessary re-renders
