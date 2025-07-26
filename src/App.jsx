@@ -63,7 +63,34 @@ function App() {
   const [error, setError] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState('Event VI - Live');
   const [lastTimestamp, setLastTimestamp] = useState(null);
+  const [lastCursor, setLastCursor] = useState(null);
 
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const newRows = await fetchSheetData(lastCursor); // pass cursor to fetchSheetData
+      let mergedFullData;
+      if (lastCursor && newRows.length > 0) {
+        mergedFullData = [...newRows, ...fullData]; // prepend new rows
+      } else {
+        mergedFullData = newRows;
+      }
+      setFullData(mergedFullData);
+
+      if (mergedFullData.length > 0) {
+        const latestCursor = mergedFullData[0].cursor;
+        console.log("Latest cursor:", latestCursor);
+        setLastCursor(latestCursor);
+      }
+
+      const eventFilteredData = filterDataByEvent(mergedFullData, selectedEvent);
+      setData(eventFilteredData);
+    } catch (err) {
+      setError(err.message || "Error loading data");
+    } finally {
+      setLoading(false);
+    }
+  };
   // Filter data based on selected event
   const filterDataByEvent = (fullData, eventKey) => {
     const event = EVENTS[eventKey];
