@@ -1,5 +1,4 @@
 const API_ENDPOINT = '/api/analytics-data';
-const LOCAL_DATA_URL = '/pinnacle_events.csv';
 
 export async function fetchSheetData(sinceTimestamp = null) {
   try {
@@ -22,27 +21,6 @@ export async function fetchSheetData(sinceTimestamp = null) {
     }
   } catch (error) {
     console.warn('Analytics service temporarily unavailable, falling back to local CSV');
-  }
-
-  // Fallback: load and parse local CSV file
-  try {
-    const response = await fetch(LOCAL_DATA_URL);
-    if (response.ok) {
-      const csv = await response.text();
-      const Papa = (await import('papaparse')).default;
-      return new Promise((resolve, reject) => {
-        Papa.parse(csv, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            resolve(results.data);
-          },
-          error: reject,
-        });
-      });
-    }
-  } catch (error) {
-    console.warn('Local analytics data unavailable, using sample data');
   }
 
   // Final fallback: Return sample data structure
