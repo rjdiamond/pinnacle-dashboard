@@ -58,7 +58,8 @@ const EVENTS = {
 function App() {
   const [data, setData] = useState([]);
   const [fullData, setFullData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // hard loading (first load/event change)
+  const [backgroundLoading, setBackgroundLoading] = useState(false); // soft loading (auto-refresh)
   const [error, setError] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState('Event VI - Live');
   const [lastTimestamp, setLastTimestamp] = useState(null);
@@ -86,31 +87,29 @@ function App() {
     return filtered;
   };
 
+  // Hard load (first load, event change)
   const loadData = async () => {
     setLoading(true);
+    setBackgroundLoading(false);
     try {
       const newRows = await fetchSheetData(lastTimestamp);
-
       let mergedFullData;
       if (lastTimestamp && newRows.length > 0) {
         mergedFullData = [...fullData, ...newRows];
       } else if (!lastTimestamp) {
         mergedFullData = newRows; // initial load
       } else {
-        mergedFullData = fullData; // no new data
+        mergedFullData = fullData;
       }
       setFullData(mergedFullData);
 
-      // Update last timestamp
       if (mergedFullData.length > 0) {
-        // Find the max timestamp
         const maxTimestamp = mergedFullData.reduce((max, row) => {
           const ts = row.updated_at_block_time;
           return ts > max ? ts : max;
         }, mergedFullData[0].updated_at_block_time);
         setLastTimestamp(maxTimestamp);
       }
-
       const eventFilteredData = filterDataByEvent(mergedFullData, selectedEvent);
       setData(eventFilteredData);
     } catch (err) {
@@ -120,14 +119,45 @@ function App() {
     }
   };
 
+  // Soft load (background auto-refresh)
+  const loadDataBackground = async () => {
+    setBackgroundLoading(true);
+    try {
+      const newRows = await fetchSheetData(lastTimestamp);
+      let mergedFullData;
+      if (lastTimestamp && newRows.length > 0) {
+        mergedFullData = [...fullData, ...newRows];
+      } else if (!lastTimestamp) {
+        mergedFullData = newRows;
+      } else {
+        mergedFullData = fullData;
+      }
+      setFullData(mergedFullData);
+
+      if (mergedFullData.length > 0) {
+        const maxTimestamp = mergedFullData.reduce((max, row) => {
+          const ts = row.updated_at_block_time;
+          return ts > max ? ts : max;
+        }, mergedFullData[0].updated_at_block_time);
+        setLastTimestamp(maxTimestamp);
+      }
+      const eventFilteredData = filterDataByEvent(mergedFullData, selectedEvent);
+      setData(eventFilteredData);
+    } catch (err) {
+      setError(err.message || "Error loading data");
+    } finally {
+      setBackgroundLoading(false);
+    }
+  };
+
   useEffect(() => {
-    loadData(); // Initial load
+    loadData(); // Initial load or event change
 
     let interval;
     if (selectedEvent === "Event VI - Live") {
       interval = setInterval(() => {
-        loadData();
-      }, 15000); // every 15 seconds
+        loadDataBackground();
+      }, 15000);
     }
     return () => clearInterval(interval);
     // eslint-disable-next-line
@@ -147,6 +177,10 @@ function App() {
 
   if (loading) return <div className="dashboard-loading">Loading data...</div>;
   if (error) return <div className="dashboard-error">{error}</div>;
+
+  // Optionally, you could show a small spinner if backgroundLoading is true,
+  // e.g. <div className="background-spinner">Refreshing...</div>
+  // But tables and charts will not flicker or disappear.
 
   // Calculate summary statistics
   const totalTransactions = data.length;
@@ -309,6 +343,11 @@ function App() {
 
       <div style={{ textAlign: 'center', marginTop: '2rem', color: '#666' }}>
         Data loaded: {data.length} transactions
+        {backgroundLoading && (
+          <span style={{ marginLeft: '1rem', fontSize: '0.95em', color: '#999' }}>
+            Refreshing...
+          </span>
+        )}
       </div>
     </div>
   );
