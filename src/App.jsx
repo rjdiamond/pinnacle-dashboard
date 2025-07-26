@@ -62,7 +62,6 @@ function App() {
   const [error, setError] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState('Event VI - Live');
   const [lastTimestamp, setLastTimestamp] = useState(null);
-//  const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Filter data based on selected event
   const filterDataByEvent = (fullData, eventKey) => {
@@ -87,32 +86,6 @@ function App() {
     return filtered;
   };
 
-  useEffect(() => {
-    loadData(); // Initial load
-  
-    let interval;
-  
-    if (selectedEvent === 'Event VI - Live') {  // For auto-refresh && autoRefresh)
-      interval = setInterval(() => {
-        console.log('[Live] Auto-refreshing...');
-        loadData();
-      }, 15000); // every 15 seconds
-    }
-  
-    return () => clearInterval(interval);
-  }, [selectedEvent]); // For auto-fresh autoRefresh
-
-  const loadData = () => {
-    fetchSheetData()
-      .then(({ filteredData, fullData }) => {
-        setFullData(fullData);
-        const eventFilteredData = filterDataByEvent(fullData, selectedEvent);
-        setData(eventFilteredData);
-      })
-      .catch((err) => setError(err.message || 'Error loading data'))
-      .finally(() => setLoading(false));
-  };
-  
   const loadData = async () => {
     setLoading(true);
     try {
@@ -159,20 +132,16 @@ function App() {
     return () => clearInterval(interval);
     // eslint-disable-next-line
   }, [selectedEvent]);
-  
+
   // Handle event selection with smooth transitions
   const handleEventChange = (eventKey) => {
     if (eventKey === selectedEvent) return; // Prevent unnecessary re-renders
-    
-    // Add loading state for smooth transition
- //   setLoading(true);
-    
+
     // Small delay to show transition
     setTimeout(() => {
       setSelectedEvent(eventKey);
       const eventFilteredData = filterDataByEvent(fullData, eventKey);
       setData(eventFilteredData);
- //     setLoading(false);
     }, 150);
   };
 
@@ -183,7 +152,7 @@ function App() {
   const totalTransactions = data.length;
   const totalSales = data.reduce((sum, row) => sum + (parseFloat(row.price) || 0), 0);
   const totalCommission = data.reduce((sum, row) => sum + (parseFloat(row.commission_amount) || 0), 0);
-  
+
   // Calculate unique buyers and sellers
   const uniqueBuyers = new Set(data.map(row => row.receiver_username).filter(Boolean));
   const uniqueSellers = new Set(data.map(row => row.seller_username).filter(Boolean));
@@ -195,74 +164,74 @@ function App() {
       <p style={{ textAlign: 'center', color: '#666', marginBottom: '0.5rem', fontSize: '1rem' }}>
         Data Auto-Refreshes During Live Events
       </p>
-      
+
       {/* Event Filter Buttons */}
       <div className="event-filter-container">
-      <button 
+        <button
           className={`event-button ${selectedEvent === 'All' ? 'active' : ''}`}
           onClick={() => handleEventChange('All')}
         >
           All
         </button>
-        <button 
+        <button
           className={`event-button ${selectedEvent === 'Event I' ? 'active' : ''}`}
           onClick={() => handleEventChange('Event I')}
         >
           Event I
         </button>
-        <button 
+        <button
           className={`event-button ${selectedEvent === 'Event II' ? 'active' : ''}`}
           onClick={() => handleEventChange('Event II')}
         >
           Event II
         </button>
-        <button 
+        <button
           className={`event-button ${selectedEvent === 'Event III' ? 'active' : ''}`}
           onClick={() => handleEventChange('Event III')}
         >
           Event III
         </button>
-        <button 
+        <button
           className={`event-button ${selectedEvent === 'Event IV' ? 'active' : ''}`}
           onClick={() => handleEventChange('Event IV')}
         >
           Event IV
         </button>
-        <button 
+        <button
           className={`event-button ${selectedEvent === 'Event V' ? 'active' : ''}`}
           onClick={() => handleEventChange('Event V')}
         >
           Event V
         </button>
-        <button 
+        <button
           className={`live-button ${selectedEvent === 'Event VI - Live' ? 'active' : ''}`}
           onClick={() => handleEventChange('Event VI - Live')}
         >
           Event VI - Live
         </button>
       </div>
-      
+
       <div className="summary-stats">
         <div className="stat-card">
           <div className="stat-number" style={{ color: '#2196F3' }}>{totalTransactions.toLocaleString()}</div>
           <div className="stat-label">Total Transactions</div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-number" style={{ color: '#2196F3' }}>${totalSales.toLocaleString()}</div>
           <div className="stat-label">Total Sales</div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-number" style={{ color: '#2196F3' }}>${totalCommission.toLocaleString()}</div>
           <div className="stat-label">Total Commission</div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-number" style={{ color: '#4CAF50' }}>{uniqueBuyers.size.toLocaleString()}</div>
           <div className="stat-label">Unique Buyers</div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-number" style={{ color: '#4CAF50' }}>{uniqueSellers.size.toLocaleString()}</div>
           <div className="stat-label">Unique Sellers</div>
@@ -270,62 +239,62 @@ function App() {
       </div>
 
       <div className="charts-row">
-      <div className="chart-container">
+        <div className="chart-container">
           <RecentSalesTable data={data} fullData={fullData} />
         </div>
       </div>
 
       <div className="charts-row">
-      <div className="chart-container">
+        <div className="chart-container">
           <TopSalesTable data={data} fullData={fullData} />
+        </div>
       </div>
-      </div>
-      
+
       <div className="charts-row">
         <div className="chart-container">
           <SalesVolumeChart data={data} selectedEvent={selectedEvent} fullData={fullData} />
         </div>
-        
+
         <div className="chart-container">
           <PinsSoldChart data={data} selectedEvent={selectedEvent} fullData={fullData} />
         </div>
       </div>
-      
+
       <div className="charts-row">
         <div className="chart-container">
           <TopPinsChart data={data} />
         </div>
-        
+
         <div className="chart-container">
           <TopSetsChart data={data} />
         </div>
       </div>
-      
+
       {/* <div className="chart-container">
         <EditionSetBarChart data={data} />
       </div> */}
-      
+
       <div className="charts-row">
         <div className="chart-container">
           <EditionShapePieChart data={data} />
         </div>
-        
+
         <div className="chart-container">
-      <EditionVariantPieChart data={data} />
+          <EditionVariantPieChart data={data} />
         </div>
-        
+
         <div className="chart-container">
           <EditionSeriesPieChart data={data} />
         </div>
       </div>
-      
+
       <div className="charts-row">
         <div className="chart-container">
-      <TopReceiversChart data={data} />
+          <TopReceiversChart data={data} />
         </div>
-        
+
         <div className="chart-container">
-      <TopSellersChart data={data} />
+          <TopSellersChart data={data} />
         </div>
       </div>
 
@@ -337,7 +306,7 @@ function App() {
           <TopSellersByCount data={data} />
         </div>
       </div>
-      
+
       <div style={{ textAlign: 'center', marginTop: '2rem', color: '#666' }}>
         Data loaded: {data.length} transactions
       </div>
@@ -345,4 +314,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;
