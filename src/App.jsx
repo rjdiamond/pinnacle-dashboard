@@ -49,8 +49,8 @@ const EVENTS = {
     title: 'Event V (July 11th – July 14th, 2025)'
   },
   'Event VI - Live': {
-    startDate: new Date('2025-07-25T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PDT
-    endDate: new Date('2025-07-28T17:15:00.000Z'),   // Jul 14, 2025 9:05 AM PDT
+    startDate: new Date('2025-07-25T16:00:00.000Z'), // Jul 25, 2025 9:00 AM PDT
+    endDate: new Date('2025-07-28T17:15:00.000Z'),   // Jul 28, 2025 9:05 AM PDT
     title: 'Event VI (July 25th – July 28th, 2025)'
   }
 };
