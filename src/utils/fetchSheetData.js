@@ -1,12 +1,6 @@
-import Papa from 'papaparse';
-
-// Use a generic API endpoint that doesn't reveal the data source
 const API_ENDPOINT = '/api/analytics-data';
-
-// Fallback to local data
 const LOCAL_DATA_URL = '/pinnacle_events.csv';
 
-// Secure data fetching with incremental support
 export async function fetchSheetData(sinceTimestamp = null) {
   try {
     let url = API_ENDPOINT;
@@ -23,7 +17,6 @@ export async function fetchSheetData(sinceTimestamp = null) {
     if (response.ok) {
       const result = await response.json();
       if (result.success && Array.isArray(result.data)) {
-        // API returns JSON array (no CSV)
         return result.data;
       }
     }
@@ -36,7 +29,6 @@ export async function fetchSheetData(sinceTimestamp = null) {
     const response = await fetch(LOCAL_DATA_URL);
     if (response.ok) {
       const csv = await response.text();
-      // Lazy-load Papa in fallback only
       const Papa = (await import('papaparse')).default;
       return new Promise((resolve, reject) => {
         Papa.parse(csv, {
