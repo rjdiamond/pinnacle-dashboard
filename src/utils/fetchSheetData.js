@@ -6,16 +6,14 @@ const API_ENDPOINT = '/api/analytics-data';
 // Fallback to local data
 const LOCAL_DATA_URL = '/pinnacle_events.csv';
 
-// No longer filtering by date here - handled in App component
-function filterDataByDate(data) {
-  return data; // Return all data, filtering will be done in App component
-}
-
-// Secure data fetching that completely hides the source
-async function fetchFromSecureAPI() {
+// Secure data fetching with incremental support
+export async function fetchSheetData(sinceTimestamp = null) {
   try {
-    // This will be handled by a server-side proxy or API route
-    const response = await fetch(API_ENDPOINT, {
+    let url = API_ENDPOINT;
+    if (sinceTimestamp) {
+      url += `?since=${encodeURIComponent(sinceTimestamp)}`;
+    }
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -24,65 +22,39 @@ async function fetchFromSecureAPI() {
     
     if (response.ok) {
       const result = await response.json();
-      if (result.success && result.data) {
-        return result.data; // This is the CSV string
+      if (result.success && Array.isArray(result.data)) {
+        // API returns JSON array (no CSV)
+        return result.data;
       }
     }
   } catch (error) {
-    console.warn('Analytics service temporarily unavailable');
+    console.warn('Analytics service temporarily unavailable, falling back to local CSV');
   }
-  return null;
-}
 
-// Additional obfuscation: wrap in a generic function name
-const getAnalyticsData = async () => {
+  // Fallback: load and parse local CSV file
   try {
-    // Try secure API first
-    const csv = await fetchFromSecureAPI();
-    if (csv) {
-      return new Promise((resolve, reject) => {
-        Papa.parse(csv, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            const fullData = results.data;
-            const filteredData = filterDataByDate(fullData);
-            console.log(`Analytics data loaded: ${filteredData.length} records (filtered from ${fullData.length} total)`);
-            resolve({ filteredData, fullData });
-          },
-          error: reject,
-        });
-      });
-    }
-  } catch (error) {
-    console.warn('Primary analytics source unavailable, using fallback');
-  }
-  
-  try {
-    // Fallback to local data
     const response = await fetch(LOCAL_DATA_URL);
     if (response.ok) {
       const csv = await response.text();
+      // Lazy-load Papa in fallback only
+      const Papa = (await import('papaparse')).default;
       return new Promise((resolve, reject) => {
         Papa.parse(csv, {
           header: true,
           skipEmptyLines: true,
           complete: (results) => {
-            const fullData = results.data;
-            const filteredData = filterDataByDate(fullData);
-            console.log(`Analytics data loaded: ${filteredData.length} records (filtered from ${fullData.length} total)`);
-            resolve({ filteredData, fullData });
+            resolve(results.data);
           },
           error: reject,
         });
       });
     }
   } catch (error) {
-    console.warn('Analytics data unavailable, using sample data');
+    console.warn('Local analytics data unavailable, using sample data');
   }
-  
+
   // Final fallback: Return sample data structure
-  const sampleData = [
+  return [
     {
       updated_at_block_time: '2025-07-12T19:08:10.735715Z',
       nft_id: '1468906216',
@@ -104,9 +76,4 @@ const getAnalyticsData = async () => {
       cursor: 'sample_cursor'
     }
   ];
-  
-  return { filteredData: sampleData, fullData: sampleData };
-};
-
-// Export with a generic name
-export const fetchSheetData = getAnalyticsData;
+}
