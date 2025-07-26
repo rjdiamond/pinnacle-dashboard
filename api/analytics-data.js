@@ -1,51 +1,43 @@
-// Vercel serverless function to proxy Google Sheets data
-// This runs server-side and completely hides the data source from the client
-
-const GOOGLE_SHEETS_URL = process.env.GOOGLE_SHEETS_URL || 'https://docs.google.com/spreadsheets/d/1Qb1NpuQi9_KMPhi7NpZ_9xhJW8xXP8_VCaV-ffM5tAE/export?format=csv&gid=1604832164';
+const GOOGLE_APPS_SCRIPT_URL = process.env.GOOGLE_APPS_SCRIPT_URL || 'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLjuqaydOJxs7ZOVJVCdItC4AhWWa7pODYFfmkoWInV55aVCvx4h1TiMqTHKb8hDycYcnRw4d0gKEdOjqZyt3Mbm8-5W4O_gJLnhbfy5HQIW7-zdkPESVoNpPJsPNgHbnhRevorwZEQRVeguZLaZ0bipxNR-Q01oka9eB958teDUEwtFk8KfOkyqY3yJMLj8PkKa8DAni-qbFnfhe6XFJA_iyy4gs6_lxphoCKENFImz886ieyKk65W_r1nMBCsdcsmHnGMua69KT1yHV7gUPtMChb9XSVbFwm004bTD&lib=Mk9S-NPd3QfsG2ZPvCwfAPb3St75Ri_GE';
 
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  // CORS headers as before...
 
-  // Handle preflight requests
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
   }
 
-  // Only allow GET requests
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
 
   try {
-    // Fetch data from Google Sheets server-side
-    const response = await fetch(GOOGLE_SHEETS_URL);
-    
+    // Support passing ?since=timestamp from client
+    const since = req.query.since;
+    let url = GOOGLE_APPS_SCRIPT_URL;
+    if (since) {
+      url += `&since=${encodeURIComponent(since)}`;
+    }
+
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
-    const csvData = await response.text();
-    
-    // Return the CSV data as JSON
+    const data = await response.json();
+
     res.status(200).json({
       success: true,
-      data: csvData,
+      data,
       timestamp: new Date().toISOString()
     });
-    
   } catch (error) {
     console.error('Error fetching analytics data:', error);
-    
-    // Return error response
     res.status(500).json({
       success: false,
       error: 'Analytics service temporarily unavailable',
       timestamp: new Date().toISOString()
     });
   }
-} 
+}
