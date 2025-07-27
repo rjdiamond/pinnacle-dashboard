@@ -63,9 +63,8 @@ function App() {
   const [error, setError] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState('Event VI - Live');
   const [lastTimestamp, setLastTimestamp] = useState(null);
-  const [lastCursor, setLastCursor] = useState(null);
 
-    // Call this function to fetch data
+  // Call this function to fetch data from your Vercel API
   async function fetchAnalyticsData(since) {
     let url = "/api/analytics-data";
     if (since) {
@@ -75,33 +74,7 @@ function App() {
     const json = await res.json();
     return json;
   }
-  
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const newRows = await fetchSheetData(lastCursor); // pass cursor to fetchSheetData
-      let mergedFullData;
-      if (lastCursor && newRows.length > 0) {
-        mergedFullData = [...newRows, ...fullData]; // prepend new rows
-      } else {
-        mergedFullData = newRows;
-      }
-      setFullData(mergedFullData);
 
-      if (mergedFullData.length > 0) {
-        const latestCursor = mergedFullData[0].cursor;
-        console.log("Latest cursor:", latestCursor);
-        setLastCursor(latestCursor);
-      }
-
-      const eventFilteredData = filterDataByEvent(mergedFullData, selectedEvent);
-      setData(eventFilteredData);
-    } catch (err) {
-      setError(err.message || "Error loading data");
-    } finally {
-      setLoading(false);
-    }
-  };
   // Filter data based on selected event
   const filterDataByEvent = (fullData, eventKey) => {
     const event = EVENTS[eventKey];
@@ -130,7 +103,7 @@ function App() {
     setLoading(true);
     setBackgroundLoading(false);
     try {
-      const newRows = await fetchSheetData(lastTimestamp);
+      const newRows = await fetchAnalyticsData(lastTimestamp);
       let mergedFullData;
       if (lastTimestamp && newRows.length > 0) {
         mergedFullData = [...fullData, ...newRows];
@@ -161,7 +134,7 @@ function App() {
   const loadDataBackground = async () => {
     setBackgroundLoading(true);
     try {
-      const newRows = await fetchSheetData(lastTimestamp);
+      const newRows = await fetchAnalyticsData(lastTimestamp);
       let mergedFullData;
       if (lastTimestamp && newRows.length > 0) {
         mergedFullData = [...fullData, ...newRows];
@@ -188,22 +161,14 @@ function App() {
     }
   };
 
-  // Example: auto-load on mount, and every N seconds
+  // Initial load and background refresh
   useEffect(() => {
-    const loadData = async () => {
-      const newRows = await fetchAnalyticsData(lastTimestamp);
-      if (newRows.length > 0) {
-        setData(prev => [...newRows, ...prev]);
-        // Update lastTimestamp to newest
-        const latest = newRows[0].updated_at_block_time;
-        setLastTimestamp(latest);
-      }
-    };
     loadData();
-    const interval = setInterval(loadData, 60000); // auto-refresh every 60s
+    const interval = setInterval(loadDataBackground, 60000); // auto-refresh every 60s
     return () => clearInterval(interval);
-  }, [lastTimestamp]);
-  
+    // eslint-disable-next-line
+  }, [selectedEvent]);
+
   // Handle event selection with smooth transitions
   const handleEventChange = (eventKey) => {
     if (eventKey === selectedEvent) return; // Prevent unnecessary re-renders
@@ -218,10 +183,6 @@ function App() {
 
   if (loading) return <div className="dashboard-loading">Loading data...</div>;
   if (error) return <div className="dashboard-error">{error}</div>;
-
-  // Optionally, you could show a small spinner if backgroundLoading is true,
-  // e.g. <div className="background-spinner">Refreshing...</div>
-  // But tables and charts will not flicker or disappear.
 
   // Calculate summary statistics
   const totalTransactions = data.length;
@@ -242,48 +203,19 @@ function App() {
 
       {/* Event Filter Buttons */}
       <div className="event-filter-container">
-        <button
-          className={`event-button ${selectedEvent === 'All' ? 'active' : ''}`}
-          onClick={() => handleEventChange('All')}
-        >
-          All
-        </button>
-        <button
-          className={`event-button ${selectedEvent === 'Event I' ? 'active' : ''}`}
-          onClick={() => handleEventChange('Event I')}
-        >
-          Event I
-        </button>
-        <button
-          className={`event-button ${selectedEvent === 'Event II' ? 'active' : ''}`}
-          onClick={() => handleEventChange('Event II')}
-        >
-          Event II
-        </button>
-        <button
-          className={`event-button ${selectedEvent === 'Event III' ? 'active' : ''}`}
-          onClick={() => handleEventChange('Event III')}
-        >
-          Event III
-        </button>
-        <button
-          className={`event-button ${selectedEvent === 'Event IV' ? 'active' : ''}`}
-          onClick={() => handleEventChange('Event IV')}
-        >
-          Event IV
-        </button>
-        <button
-          className={`event-button ${selectedEvent === 'Event V' ? 'active' : ''}`}
-          onClick={() => handleEventChange('Event V')}
-        >
-          Event V
-        </button>
-        <button
-          className={`live-button ${selectedEvent === 'Event VI - Live' ? 'active' : ''}`}
-          onClick={() => handleEventChange('Event VI - Live')}
-        >
-          Event VI - Live
-        </button>
+        {Object.keys(EVENTS).map(eventKey => (
+          <button
+            key={eventKey}
+            className={
+              eventKey === 'Event VI - Live'
+                ? `live-button ${selectedEvent === eventKey ? 'active' : ''}`
+                : `event-button ${selectedEvent === eventKey ? 'active' : ''}`
+            }
+            onClick={() => handleEventChange(eventKey)}
+          >
+            {eventKey}
+          </button>
+        ))}
       </div>
 
       <div className="summary-stats">
@@ -399,7 +331,7 @@ function App() {
         </pre>
       </div>
     </div>
-  );  
+  );
 }
 
 export default App;
