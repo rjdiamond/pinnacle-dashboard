@@ -65,6 +65,17 @@ function App() {
   const [lastTimestamp, setLastTimestamp] = useState(null);
   const [lastCursor, setLastCursor] = useState(null);
 
+    // Call this function to fetch data
+  async function fetchAnalyticsData(since) {
+    let url = "/api/analytics-data";
+    if (since) {
+      url += `?since=${encodeURIComponent(since)}`;
+    }
+    const res = await fetch(url);
+    const json = await res.json();
+    return json;
+  }
+  
   const loadData = async () => {
     setLoading(true);
     try {
@@ -177,19 +188,22 @@ function App() {
     }
   };
 
+  // Example: auto-load on mount, and every N seconds
   useEffect(() => {
-    loadData(); // Initial load or event change
-
-    let interval;
-    if (selectedEvent === "Event VI - Live") {
-      interval = setInterval(() => {
-        loadDataBackground();
-      }, 60000);
-    }
+    const loadData = async () => {
+      const newRows = await fetchAnalyticsData(lastTimestamp);
+      if (newRows.length > 0) {
+        setData(prev => [...newRows, ...prev]);
+        // Update lastTimestamp to newest
+        const latest = newRows[0].updated_at_block_time;
+        setLastTimestamp(latest);
+      }
+    };
+    loadData();
+    const interval = setInterval(loadData, 60000); // auto-refresh every 60s
     return () => clearInterval(interval);
-    // eslint-disable-next-line
-  }, [selectedEvent]);
-
+  }, [lastTimestamp]);
+  
   // Handle event selection with smooth transitions
   const handleEventChange = (eventKey) => {
     if (eventKey === selectedEvent) return; // Prevent unnecessary re-renders
@@ -376,8 +390,16 @@ function App() {
           </span>
         )}
       </div>
+
+      {/* DEBUG: Raw data viewer */}
+      <div style={{ margin: '2rem auto', maxWidth: 900, background: '#f8f8f8', padding: 20, borderRadius: 8 }}>
+        <h3 style={{ color: '#888', fontWeight: 400 }}>Raw Data (JSON, latest first)</h3>
+        <pre style={{ fontSize: 13, background: '#fff', padding: 12, borderRadius: 6, overflowX: 'auto', maxHeight: 350 }}>
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      </div>
     </div>
-  );
+  );  
 }
 
 export default App;
