@@ -1,59 +1,51 @@
-import { google } from 'googleapis';
+// Vercel serverless function to proxy Google Sheets data
+// This runs server-side and completely hides the data source from the client
+
+const GOOGLE_SHEETS_URL = process.env.GOOGLE_SHEETS_URL || 'https://docs.google.com/spreadsheets/d/1Qb1NpuQi9_KMPhi7NpZ_9xhJW8xXP8_VCaV-ffM5tAE/export?format=csv&gid=1069134817';
 
 export default async function handler(req, res) {
-  const sheetId = '1Qb1NpuQi9_KMPhi7NpZ_9xhJW8xXP8_VCaV-ffM5tAE'; // e.g. '1Qb1NpuQi9_KMPhi7NpZ_9xhJW8xXP8_VCaV-ffM5tAE'
-  const sheetName = 'cursor';      // e.g. 'cursor'
-  const since = req.query.since;   // ISO string or undefined
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Load service account credentials from Vercel env
-  const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
 
-  const auth = new google.auth.GoogleAuth({
-    credentials: serviceAccount,
-    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-  });
-
-  const sheets = google.sheets({ version: 'v4', auth: await auth.getClient() });
+  // Only allow GET requests
+  if (req.method !== 'GET') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
 
   try {
-    // Fetch all rows (or use ranges for partial reads)
-    const range = `${sheetName}`; // or `${sheetName}!A:Z` if you want specific columns
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: sheetId,
-      range,
+    // Fetch data from Google Sheets server-side
+    const response = await fetch(GOOGLE_SHEETS_URL);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const csvData = await response.text();
+    
+    // Return the CSV data as JSON
+    res.status(200).json({
+      success: true,
+      data: csvData,
+      timestamp: new Date().toISOString()
     });
-    const rows = response.data.values;
-    if (!rows || rows.length < 2) {
-      return res.status(200).json([]);
-    }
-    const headers = rows[0];
-    const dataRows = rows.slice(1);
-
-    // Find timestamp column
-    const timestampCol = headers.indexOf('updated_at_block_time');
-    if (timestampCol === -1) {
-      return res.status(500).json({ error: 'No updated_at_block_time column found' });
-    }
-
-    // Filter by timestamp
-    let filtered = [];
-    let sinceTime = since ? new Date(since).getTime() : null;
-    for (const row of dataRows) {
-      let rowTime = new Date(row[timestampCol]).getTime();
-      if (!sinceTime || rowTime > sinceTime) {
-        let obj = {};
-        headers.forEach((header, i) => {
-          obj[header] = row[i];
-        });
-        filtered.push(obj);
-      } else if (sinceTime) {
-        // If sorted DESC, break early
-        break;
-      }
-    }
-
-    res.status(200).json(filtered);
+    
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching analytics data:', error);
+    
+    // Return error response
+    res.status(500).json({
+      success: false,
+      error: 'Analytics service temporarily unavailable',
+      timestamp: new Date().toISOString()
+    });
   }
-}
+} 

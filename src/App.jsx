@@ -49,8 +49,8 @@ const EVENTS = {
     title: 'Event V (July 11th – July 14th, 2025)'
   },
   'Event VI - Live': {
-    startDate: new Date('2025-07-25T16:00:00.000Z'), // Jul 25, 2025 9:00 AM PDT
-    endDate: new Date('2025-07-28T17:15:00.000Z'),   // Jul 28, 2025 9:05 AM PDT
+    startDate: new Date('2025-07-25T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PDT
+    endDate: new Date('2025-07-28T17:15:00.000Z'),   // Jul 14, 2025 9:05 AM PDT
     title: 'Event VI (July 25th – July 28th, 2025)'
   }
 };
@@ -58,22 +58,10 @@ const EVENTS = {
 function App() {
   const [data, setData] = useState([]);
   const [fullData, setFullData] = useState([]);
-  const [loading, setLoading] = useState(true); // hard loading (first load/event change)
-  const [backgroundLoading, setBackgroundLoading] = useState(false); // soft loading (auto-refresh)
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState('Event VI - Live');
-  const [lastTimestamp, setLastTimestamp] = useState(null);
-
-  // Call this function to fetch data from your Vercel API
-  async function fetchAnalyticsData(since) {
-    let url = "/api/analytics-data";
-    if (since) {
-      url += `?since=${encodeURIComponent(since)}`;
-    }
-    const res = await fetch(url);
-    const json = await res.json();
-    return json;
-  }
+//  const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Filter data based on selected event
   const filterDataByEvent = (fullData, eventKey) => {
@@ -98,86 +86,46 @@ function App() {
     return filtered;
   };
 
-  // Hard load (first load, event change)
-  const loadData = async () => {
-    setLoading(true);
-    setBackgroundLoading(false);
-    try {
-      const newRows = await fetchAnalyticsData(lastTimestamp);
-      let mergedFullData;
-      if (lastTimestamp && newRows.length > 0) {
-        mergedFullData = [...fullData, ...newRows];
-      } else if (!lastTimestamp) {
-        mergedFullData = newRows; // initial load
-      } else {
-        mergedFullData = fullData;
-      }
-      setFullData(mergedFullData);
-
-      if (mergedFullData.length > 0) {
-        const maxTimestamp = mergedFullData.reduce((max, row) => {
-          const ts = row.updated_at_block_time;
-          return ts > max ? ts : max;
-        }, mergedFullData[0].updated_at_block_time);
-        setLastTimestamp(maxTimestamp);
-      }
-      const eventFilteredData = filterDataByEvent(mergedFullData, selectedEvent);
-      setData(eventFilteredData);
-    } catch (err) {
-      setError(err.message || "Error loading data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Soft load (background auto-refresh)
-  const loadDataBackground = async () => {
-    setBackgroundLoading(true);
-    try {
-      const newRows = await fetchAnalyticsData(lastTimestamp);
-      let mergedFullData;
-      if (lastTimestamp && newRows.length > 0) {
-        mergedFullData = [...fullData, ...newRows];
-      } else if (!lastTimestamp) {
-        mergedFullData = newRows;
-      } else {
-        mergedFullData = fullData;
-      }
-      setFullData(mergedFullData);
-
-      if (mergedFullData.length > 0) {
-        const maxTimestamp = mergedFullData.reduce((max, row) => {
-          const ts = row.updated_at_block_time;
-          return ts > max ? ts : max;
-        }, mergedFullData[0].updated_at_block_time);
-        setLastTimestamp(maxTimestamp);
-      }
-      const eventFilteredData = filterDataByEvent(mergedFullData, selectedEvent);
-      setData(eventFilteredData);
-    } catch (err) {
-      setError(err.message || "Error loading data");
-    } finally {
-      setBackgroundLoading(false);
-    }
-  };
-
-  // Initial load and background refresh
   useEffect(() => {
-    loadData();
-    const interval = setInterval(loadDataBackground, 60000); // auto-refresh every 60s
+    loadData(); // Initial load
+  
+    let interval;
+  
+    if (selectedEvent === 'Event VI - Live') {  // For auto-refresh && autoRefresh)
+      interval = setInterval(() => {
+        console.log('[Live] Auto-refreshing...');
+        loadData();
+      }, 15000); // every 15 seconds
+    }
+  
     return () => clearInterval(interval);
-    // eslint-disable-next-line
-  }, [selectedEvent]);
+  }, [selectedEvent]); // For auto-fresh autoRefresh
+
+  const loadData = () => {
+    fetchSheetData()
+      .then(({ filteredData, fullData }) => {
+        setFullData(fullData);
+        const eventFilteredData = filterDataByEvent(fullData, selectedEvent);
+        setData(eventFilteredData);
+      })
+      .catch((err) => setError(err.message || 'Error loading data'))
+      .finally(() => setLoading(false));
+  };
+  
 
   // Handle event selection with smooth transitions
   const handleEventChange = (eventKey) => {
     if (eventKey === selectedEvent) return; // Prevent unnecessary re-renders
-
+    
+    // Add loading state for smooth transition
+ //   setLoading(true);
+    
     // Small delay to show transition
     setTimeout(() => {
       setSelectedEvent(eventKey);
       const eventFilteredData = filterDataByEvent(fullData, eventKey);
       setData(eventFilteredData);
+ //     setLoading(false);
     }, 150);
   };
 
@@ -188,7 +136,7 @@ function App() {
   const totalTransactions = data.length;
   const totalSales = data.reduce((sum, row) => sum + (parseFloat(row.price) || 0), 0);
   const totalCommission = data.reduce((sum, row) => sum + (parseFloat(row.commission_amount) || 0), 0);
-
+  
   // Calculate unique buyers and sellers
   const uniqueBuyers = new Set(data.map(row => row.receiver_username).filter(Boolean));
   const uniqueSellers = new Set(data.map(row => row.seller_username).filter(Boolean));
@@ -200,45 +148,74 @@ function App() {
       <p style={{ textAlign: 'center', color: '#666', marginBottom: '0.5rem', fontSize: '1rem' }}>
         Data Auto-Refreshes During Live Events
       </p>
-
+      
       {/* Event Filter Buttons */}
       <div className="event-filter-container">
-        {Object.keys(EVENTS).map(eventKey => (
-          <button
-            key={eventKey}
-            className={
-              eventKey === 'Event VI - Live'
-                ? `live-button ${selectedEvent === eventKey ? 'active' : ''}`
-                : `event-button ${selectedEvent === eventKey ? 'active' : ''}`
-            }
-            onClick={() => handleEventChange(eventKey)}
-          >
-            {eventKey}
-          </button>
-        ))}
+      <button 
+          className={`event-button ${selectedEvent === 'All' ? 'active' : ''}`}
+          onClick={() => handleEventChange('All')}
+        >
+          All
+        </button>
+        <button 
+          className={`event-button ${selectedEvent === 'Event I' ? 'active' : ''}`}
+          onClick={() => handleEventChange('Event I')}
+        >
+          Event I
+        </button>
+        <button 
+          className={`event-button ${selectedEvent === 'Event II' ? 'active' : ''}`}
+          onClick={() => handleEventChange('Event II')}
+        >
+          Event II
+        </button>
+        <button 
+          className={`event-button ${selectedEvent === 'Event III' ? 'active' : ''}`}
+          onClick={() => handleEventChange('Event III')}
+        >
+          Event III
+        </button>
+        <button 
+          className={`event-button ${selectedEvent === 'Event IV' ? 'active' : ''}`}
+          onClick={() => handleEventChange('Event IV')}
+        >
+          Event IV
+        </button>
+        <button 
+          className={`event-button ${selectedEvent === 'Event V' ? 'active' : ''}`}
+          onClick={() => handleEventChange('Event V')}
+        >
+          Event V
+        </button>
+        <button 
+          className={`live-button ${selectedEvent === 'Event VI - Live' ? 'active' : ''}`}
+          onClick={() => handleEventChange('Event VI - Live')}
+        >
+          Event VI - Live
+        </button>
       </div>
-
+      
       <div className="summary-stats">
         <div className="stat-card">
           <div className="stat-number" style={{ color: '#2196F3' }}>{totalTransactions.toLocaleString()}</div>
           <div className="stat-label">Total Transactions</div>
         </div>
-
+        
         <div className="stat-card">
           <div className="stat-number" style={{ color: '#2196F3' }}>${totalSales.toLocaleString()}</div>
           <div className="stat-label">Total Sales</div>
         </div>
-
+        
         <div className="stat-card">
           <div className="stat-number" style={{ color: '#2196F3' }}>${totalCommission.toLocaleString()}</div>
           <div className="stat-label">Total Commission</div>
         </div>
-
+        
         <div className="stat-card">
           <div className="stat-number" style={{ color: '#4CAF50' }}>{uniqueBuyers.size.toLocaleString()}</div>
           <div className="stat-label">Unique Buyers</div>
         </div>
-
+        
         <div className="stat-card">
           <div className="stat-number" style={{ color: '#4CAF50' }}>{uniqueSellers.size.toLocaleString()}</div>
           <div className="stat-label">Unique Sellers</div>
@@ -246,62 +223,62 @@ function App() {
       </div>
 
       <div className="charts-row">
-        <div className="chart-container">
+      <div className="chart-container">
           <RecentSalesTable data={data} fullData={fullData} />
         </div>
       </div>
 
       <div className="charts-row">
-        <div className="chart-container">
+      <div className="chart-container">
           <TopSalesTable data={data} fullData={fullData} />
-        </div>
       </div>
-
+      </div>
+      
       <div className="charts-row">
         <div className="chart-container">
           <SalesVolumeChart data={data} selectedEvent={selectedEvent} fullData={fullData} />
         </div>
-
+        
         <div className="chart-container">
           <PinsSoldChart data={data} selectedEvent={selectedEvent} fullData={fullData} />
         </div>
       </div>
-
+      
       <div className="charts-row">
         <div className="chart-container">
           <TopPinsChart data={data} />
         </div>
-
+        
         <div className="chart-container">
           <TopSetsChart data={data} />
         </div>
       </div>
-
+      
       {/* <div className="chart-container">
         <EditionSetBarChart data={data} />
       </div> */}
-
+      
       <div className="charts-row">
         <div className="chart-container">
           <EditionShapePieChart data={data} />
         </div>
-
+        
         <div className="chart-container">
-          <EditionVariantPieChart data={data} />
+      <EditionVariantPieChart data={data} />
         </div>
-
+        
         <div className="chart-container">
           <EditionSeriesPieChart data={data} />
         </div>
       </div>
-
+      
       <div className="charts-row">
         <div className="chart-container">
-          <TopReceiversChart data={data} />
+      <TopReceiversChart data={data} />
         </div>
-
+        
         <div className="chart-container">
-          <TopSellersChart data={data} />
+      <TopSellersChart data={data} />
         </div>
       </div>
 
@@ -313,25 +290,12 @@ function App() {
           <TopSellersByCount data={data} />
         </div>
       </div>
-
+      
       <div style={{ textAlign: 'center', marginTop: '2rem', color: '#666' }}>
         Data loaded: {data.length} transactions
-        {backgroundLoading && (
-          <span style={{ marginLeft: '1rem', fontSize: '0.95em', color: '#999' }}>
-            Refreshing...
-          </span>
-        )}
-      </div>
-
-      {/* DEBUG: Raw data viewer */}
-      <div style={{ margin: '2rem auto', maxWidth: 900, background: '#f8f8f8', padding: 20, borderRadius: 8 }}>
-        <h3 style={{ color: '#888', fontWeight: 400 }}>Raw Data (JSON, latest first)</h3>
-        <pre style={{ fontSize: 13, background: '#fff', padding: 12, borderRadius: 6, overflowX: 'auto', maxHeight: 350 }}>
-          {JSON.stringify(data, null, 2)}
-        </pre>
       </div>
     </div>
   );
 }
 
-export default App;
+export default App; 
