@@ -95,7 +95,7 @@ function App() {
       interval = setInterval(() => {
         console.log('[Live] Auto-refreshing...');
         loadData();
-      }, 60000); // every 60 seconds
+      }, 600000000); // every 600,000 seconds
     }
   
     return () => clearInterval(interval);
