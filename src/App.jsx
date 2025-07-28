@@ -48,7 +48,7 @@ const EVENTS = {
     endDate: new Date('2025-07-14T17:15:00.000Z'),   // Jul 14, 2025 9:05 AM PDT
     title: 'Event V (July 11th – July 14th, 2025)'
   },
-  'Event VI - Live': {
+  'Event VI': {
     startDate: new Date('2025-07-25T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PDT
     endDate: new Date('2025-07-28T17:15:00.000Z'),   // Jul 14, 2025 9:05 AM PDT
     title: 'Event VI (July 25th – July 28th, 2025)'
@@ -60,7 +60,7 @@ function App() {
   const [fullData, setFullData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState('Event VI - Live');
+  const [selectedEvent, setSelectedEvent] = useState('Event VI');
 //  const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Filter data based on selected event
@@ -91,7 +91,7 @@ function App() {
   
     let interval;
   
-    if (selectedEvent === 'Event VI - Live') {  // For auto-refresh && autoRefresh)
+    if (selectedEvent === 'Event VI') {  // For auto-refresh && autoRefresh)
       interval = setInterval(() => {
         console.log('[Live] Auto-refreshing...');
         loadData();
@@ -188,10 +188,10 @@ function App() {
           Event V
         </button>
         <button 
-          className={`live-button ${selectedEvent === 'Event VI - Live' ? 'active' : ''}`}
-          onClick={() => handleEventChange('Event VI - Live')}
+          className={`live-button ${selectedEvent === 'Event VI' ? 'active' : ''}`}
+          onClick={() => handleEventChange('Event VI')}
         >
-          Event VI - Live
+          Event VI
         </button>
       </div>
       
