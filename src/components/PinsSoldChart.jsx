@@ -12,24 +12,34 @@ const EVENTS = {
     color: '#FF6B6B' // Red
   },
   'Event II': {
-    startDate: new Date('2025-03-21T17:00:00.000Z'), // Mar 20, 2025 9:00 AM PST
+    startDate: new Date('2025-03-21T16:00:00.000Z'), // Mar 20, 2025 9:00 AM PST
     endDate: new Date('2025-03-24T17:15:00.000Z'),   // Mar 23, 2025 11:59 PM PST
     color: '#4ECDC4' // Teal
   },
   'Event III': {
-    startDate: new Date('2025-05-16T17:00:00.000Z'), // May 16, 2025 9:00 AM PST
+    startDate: new Date('2025-05-16T16:00:00.000Z'), // May 16, 2025 9:00 AM PST
     endDate: new Date('2025-05-20T17:15:00.000Z'),   // May 19, 2025 11:59 PM PST
     color: '#45B7D1' // Blue
   },
   'Event IV': {
-    startDate: new Date('2025-06-26T17:00:00.000Z'), // Jun 26, 2025 9:00 AM PST
+    startDate: new Date('2025-06-26T16:00:00.000Z'), // Jun 26, 2025 9:00 AM PST
     endDate: new Date('2025-07-01T17:15:00.000Z'),   // Jun 30, 2025 11:59 PM PST
     color: '#96CEB4' // Green
   },
   'Event V': {
     startDate: new Date('2025-07-11T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PDT
-    endDate: new Date('2025-07-16T17:15:00.000Z'),   // Jul 16, 2025 9:00 AM PDT
+    endDate: new Date('2025-07-14T17:15:00.000Z'),   // Jul 14, 2025 9:05 AM PDT
     color: '#FFEAA7' // Yellow
+  },
+  'Event VI': {
+    startDate: new Date('2025-07-25T16:00:00.000Z'), // Jul 25, 2025 9:00 AM PDT
+    endDate: new Date('2025-07-28T17:15:00.000Z'),   // Jul 28, 2025 9:15 AM PDT
+    color: '#DDA0DD' // Plum
+  },
+  'Event VII': {
+    startDate: new Date('2025-08-01T16:00:00.000Z'), // Aug 1, 2025 9:00 AM PDT
+    endDate: new Date('2025-08-04T17:15:00.000Z'),   // Aug 4, 2025 9:05 AM PDT
+    color: '#FF4757' // Red (live event)
   }
 };
 
@@ -68,42 +78,35 @@ function groupByDayCount(data, dateKey) {
 function groupByDayCountByEvent(data, dateKey) {
   const result = {};
   
-  // Initialize result structure for each event
+  // Initialize result structure for each event only
   Object.keys(EVENTS).forEach(eventKey => {
     result[eventKey] = {};
   });
-  
-  // Add "Other Sales" category for data outside events
-  result['Other Sales'] = {};
   
   data.forEach(row => {
     const dateTime = row[dateKey];
     if (!dateTime) return;
     
-    const rowDate = new Date(dateTime);
+    const rowDate = new Date(dateTime); // UTC date from data
     let eventKey = null;
     
-    // Determine which event this row belongs to (with 1-day buffer)
+    // Determine which event this row belongs to (exact date range, no buffer)
     for (const [key, event] of Object.entries(EVENTS)) {
-      const bufferStart = new Date(event.startDate.getTime() - 24 * 60 * 60 * 1000); // 1 day before
-      const bufferEnd = new Date(event.endDate.getTime() + 24 * 60 * 60 * 1000); // 1 day after
-      
-      if (rowDate >= bufferStart && rowDate <= bufferEnd) {
+      if (rowDate >= event.startDate && rowDate <= event.endDate) {
         eventKey = key;
         break;
       }
     }
     
-    // If not in any event (including buffers), categorize as "Other Sales"
-    if (!eventKey) {
-      eventKey = 'Other Sales';
+    // Only include data that falls within event periods
+    if (eventKey) {
+      // Convert UTC to PST for display grouping
+      const pstDate = new Date(rowDate.toLocaleString("en-US", {timeZone: "America/Los_Angeles"}));
+      const dateDay = pstDate.toISOString().slice(0, 10); // YYYY-MM-DD in PST
+      
+      if (!result[eventKey][dateDay]) result[eventKey][dateDay] = 0;
+      result[eventKey][dateDay] += 1;
     }
-    
-    // Use original timestamp without PST conversion for "All" view
-    const dateDay = rowDate.toISOString().slice(0, 10); // YYYY-MM-DD
-    
-    if (!result[eventKey][dateDay]) result[eventKey][dateDay] = 0;
-    result[eventKey][dateDay] += 1;
   });
   
   return result;
@@ -140,17 +143,19 @@ export default function PinsSoldChart({ data, selectedEvent, fullData }) {
     const labels = Array.from(allLabels).sort();
     const formattedLabels = labels.map(label => formatDayLabel(label));
     
-    // Create datasets for each event
-    const datasets = Object.entries(groupedByEvent).map(([eventKey, eventData]) => {
-      const values = labels.map(day => eventData[day] || 0);
-      return {
-        label: eventKey,
-        data: values,
-        backgroundColor: eventKey === 'Other Sales' ? '#E0E0E0' : EVENTS[eventKey].color,
-        borderColor: eventKey === 'Other Sales' ? '#B0B0B0' : EVENTS[eventKey].color,
-        borderWidth: 1,
-      };
-    });
+    // Create datasets for each event (only show events with data)
+    const datasets = Object.entries(groupedByEvent)
+      .filter(([eventKey, eventData]) => Object.keys(eventData).length > 0) // Only events with data
+      .map(([eventKey, eventData]) => {
+        const values = labels.map(day => eventData[day] || 0);
+        return {
+          label: eventKey,
+          data: values,
+          backgroundColor: EVENTS[eventKey].color,
+          borderColor: EVENTS[eventKey].color,
+          borderWidth: 1,
+        };
+      });
     
     chartData = {
       labels: formattedLabels,
@@ -177,7 +182,7 @@ export default function PinsSoldChart({ data, selectedEvent, fullData }) {
 
   return (
     <div style={{ margin: '2rem 0' }}>
-      <h2>Pins Sold by {selectedEvent === 'All' ? 'Day' : 'Hour'} {selectedEvent === 'All' ? '' : '(PST)'}</h2>
+      <h2>Pins Sold by {selectedEvent === 'All' ? 'Day (PST)' : 'Hour (PST)'}</h2>
       <Bar data={chartData} options={{
         responsive: true,
         plugins: { 
@@ -201,10 +206,10 @@ export default function PinsSoldChart({ data, selectedEvent, fullData }) {
                   const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
                   const month = pstDate.toLocaleDateString('en-US', { month: 'short' });
                   const day = pstDate.getDate();
-                  return `${month} ${day}, ${displayHour}${ampm}`;
+                  return `${month} ${day}, ${displayHour}${ampm} PST`;
                 }
                 // Default for daily view
-                return context[0].label;
+                return context[0].label + ' (PST)';
               },
               label: function(context) {
                 // Show the value for pins sold
@@ -217,13 +222,13 @@ export default function PinsSoldChart({ data, selectedEvent, fullData }) {
           x: { 
             title: { 
               display: true, 
-              text: selectedEvent === 'All' ? 'Date' : 'Time (PST)' 
+              text: selectedEvent === 'All' ? 'Date (PST)' : 'Time (PST)' 
             } 
           }, 
           y: { 
             title: { 
               display: true, 
-              text: 'Pins Sold' 
+              text: 'Pins Sold (Count)' 
             } 
           } 
         }
