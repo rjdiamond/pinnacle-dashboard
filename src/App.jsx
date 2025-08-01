@@ -324,9 +324,9 @@ function App() {
         </button>
         <button 
           className="giveaway-button"
-          onClick={() => window.open('https://twitter.com', '_blank')}
+          onClick={() => window.open('https://x.com/DiamondNFL/status/1951364965518254269', '_blank')}
         >
-          Giveaway
+          Giveaway (Active!)
         </button>
       </div>
       
