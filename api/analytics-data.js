@@ -1,7 +1,7 @@
 // Vercel serverless function to proxy Google Sheets data
 // This runs server-side and completely hides the data source from the client
 
-const GOOGLE_SHEETS_URL = process.env.GOOGLE_SHEETS_URL || 'https://docs.google.com/spreadsheets/d/1Qb1NpuQi9_KMPhi7NpZ_9xhJW8xXP8_VCaV-ffM5tAE/export?format=csv&gid=340314545';
+const GOOGLE_SHEETS_URL = process.env.GOOGLE_SHEETS_URL;
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -18,6 +18,17 @@ export default async function handler(req, res) {
   // Only allow GET requests
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  // Check if environment variable is configured
+  if (!GOOGLE_SHEETS_URL) {
+    console.error('GOOGLE_SHEETS_URL environment variable not configured');
+    res.status(500).json({
+      success: false,
+      error: 'Data source not configured',
+      timestamp: new Date().toISOString()
+    });
     return;
   }
 
