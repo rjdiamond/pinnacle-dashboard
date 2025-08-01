@@ -49,8 +49,8 @@ const EVENTS = {
     title: 'Event V (July 11th – July 14th, 2025)'
   },
   'Event VI': {
-    startDate: new Date('2025-07-25T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PDT
-    endDate: new Date('2025-07-28T17:15:00.000Z'),   // Jul 14, 2025 9:05 AM PDT
+    startDate: new Date('2025-07-25T16:00:00.000Z'), // Jul 25, 2025 9:00 AM PDT
+    endDate: new Date('2025-07-28T17:15:00.000Z'),   // Jul 28, 2025 9:15 AM PDT
     title: 'Event VI (July 25th – July 28th, 2025)'
   },
   'Event VII': {
@@ -76,20 +76,75 @@ function App() {
     if (!event.startDate || !event.endDate) {
       return fullData;
     }
-    // Robust UTC filtering
+    
+    // Robust UTC filtering with error handling
     const filtered = fullData.filter(row => {
-      const utcDate = new Date(row.updated_at_block_time);
-      return utcDate >= event.startDate && utcDate <= event.endDate;
+      if (!row.updated_at_block_time) return false;
+      
+      try {
+        const utcDate = new Date(row.updated_at_block_time);
+        // Check if the date is valid
+        if (isNaN(utcDate.getTime())) {
+          console.warn('Invalid date found:', row.updated_at_block_time);
+          return false;
+        }
+        return utcDate >= event.startDate && utcDate <= event.endDate;
+      } catch (error) {
+        console.warn('Error parsing date:', row.updated_at_block_time, error);
+        return false;
+      }
     });
-    // Debug: log min/max timestamps for Event V
-    if (eventKey === 'Event V') {
-      const timestamps = filtered.map(row => row.updated_at_block_time).sort();
-      if (timestamps.length > 0) {
-        console.log('Event V UTC range:', timestamps[0], 'to', timestamps[timestamps.length - 1]);
-      } else {
-        console.log('Event V: No transactions found in UTC window');
+    
+    // Debug: log min/max timestamps for all events to help troubleshoot
+    if (eventKey !== 'All') {
+      const validTimestamps = filtered
+        .map(row => row.updated_at_block_time)
+        .filter(timestamp => {
+          try {
+            const date = new Date(timestamp);
+            return !isNaN(date.getTime());
+          } catch {
+            return false;
+          }
+        })
+        .sort();
+        
+      const sampleDates = fullData.slice(0, 5)
+        .map(row => row.updated_at_block_time)
+        .filter(timestamp => timestamp); // Filter out undefined/null
+      
+      console.log(`${eventKey} filtering:`, {
+        startDate: event.startDate.toISOString(),
+        endDate: event.endDate.toISOString(),
+        totalRecords: fullData.length,
+        filteredRecords: filtered.length,
+        firstTransaction: validTimestamps[0] || 'None',
+        lastTransaction: validTimestamps[validTimestamps.length - 1] || 'None',
+        sampleDataDates: sampleDates
+      });
+      
+      // Special debugging for Event VI
+      if (eventKey === 'Event VI' && filtered.length === 0) {
+        console.log('🔍 Event VI Debug - No transactions found. Checking data around that time period...');
+        const julyTransactions = fullData.filter(row => {
+          if (!row.updated_at_block_time) return false;
+          try {
+            const date = new Date(row.updated_at_block_time);
+            if (isNaN(date.getTime())) return false;
+            return date.getMonth() === 6 && date.getFullYear() === 2025; // July 2025
+          } catch {
+            return false;
+          }
+        });
+        console.log(`Found ${julyTransactions.length} transactions in July 2025:`, 
+          julyTransactions.slice(0, 3).map(row => ({
+            date: row.updated_at_block_time,
+            price: row.price
+          }))
+        );
       }
     }
+    
     return filtered;
   };
 
@@ -121,6 +176,47 @@ function App() {
     fetchSheetData()
       .then(({ filteredData, fullData }) => {
         setFullData(fullData);
+        
+        // Analyze the date range of your data with error handling
+        if (fullData.length > 0) {
+          try {
+            const validDates = fullData
+              .map(row => {
+                if (!row.updated_at_block_time) return null;
+                try {
+                  const date = new Date(row.updated_at_block_time);
+                  return isNaN(date.getTime()) ? null : date;
+                } catch {
+                  return null;
+                }
+              })
+              .filter(date => date !== null)
+              .sort((a, b) => a - b);
+              
+            const invalidDates = fullData.filter(row => {
+              if (!row.updated_at_block_time) return true;
+              try {
+                const date = new Date(row.updated_at_block_time);
+                return isNaN(date.getTime());
+              } catch {
+                return true;
+              }
+            });
+            
+            console.log('📊 Data Range Analysis:', {
+              totalRecords: fullData.length,
+              validDates: validDates.length,
+              invalidDates: invalidDates.length,
+              earliestTransaction: validDates[0]?.toISOString() || 'None',
+              latestTransaction: validDates[validDates.length - 1]?.toISOString() || 'None',
+              eventVIRange: `${EVENTS['Event VI'].startDate.toISOString()} to ${EVENTS['Event VI'].endDate.toISOString()}`,
+              sampleInvalidDates: invalidDates.slice(0, 3).map(row => row.updated_at_block_time)
+            });
+          } catch (error) {
+            console.error('Error analyzing data range:', error);
+          }
+        }
+        
         const eventFilteredData = filterDataByEvent(fullData, selectedEvent);
         setData(eventFilteredData);
         console.log(`[Data Load Complete] ${fullData.length} total records, ${eventFilteredData.length} for ${selectedEvent}`);
@@ -148,14 +244,20 @@ function App() {
   if (loading) return <div className="dashboard-loading">Loading data...</div>;
   if (error) return <div className="dashboard-error">{error}</div>;
 
-  // Calculate summary statistics
-  const totalTransactions = data.length;
-  const totalSales = data.reduce((sum, row) => sum + (parseFloat(row.price) || 0), 0);
-  const totalCommission = data.reduce((sum, row) => sum + (parseFloat(row.commission_amount) || 0), 0);
+  // Calculate summary statistics with error handling
+  const totalTransactions = data ? data.length : 0;
+  const totalSales = data ? data.reduce((sum, row) => {
+    const price = parseFloat(row.price);
+    return sum + (isNaN(price) ? 0 : price);
+  }, 0) : 0;
+  const totalCommission = data ? data.reduce((sum, row) => {
+    const commission = parseFloat(row.commission_amount);
+    return sum + (isNaN(commission) ? 0 : commission);
+  }, 0) : 0;
   
-  // Calculate unique buyers and sellers
-  const uniqueBuyers = new Set(data.map(row => row.receiver_username).filter(Boolean));
-  const uniqueSellers = new Set(data.map(row => row.seller_username).filter(Boolean));
+  // Calculate unique buyers and sellers with error handling
+  const uniqueBuyers = data ? new Set(data.map(row => row.receiver_username).filter(Boolean)) : new Set();
+  const uniqueSellers = data ? new Set(data.map(row => row.seller_username).filter(Boolean)) : new Set();
 
   return (
     <div className="dashboard-container">
