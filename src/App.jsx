@@ -322,6 +322,12 @@ function App() {
         >
           Event VII
         </button>
+        <button 
+          className="giveaway-button"
+          onClick={() => window.open('https://twitter.com', '_blank')}
+        >
+          Giveaway
+        </button>
       </div>
       
       <div className="summary-stats">
