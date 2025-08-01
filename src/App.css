@@ -110,6 +110,57 @@ h1::after {
   box-shadow: 0 8px 20px rgba(79, 140, 255, 0.5);
 }
 
+/* Live Event Button (Red) */
+.live-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid #ff4757;
+  background: #fff;
+  color: #ff4757;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.live-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.live-button:hover::before {
+  left: 100%;
+}
+
+.live-button:hover {
+  background: #fff5f5;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(255, 71, 87, 0.25);
+}
+
+.live-button.active {
+  background: #ff4757;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(255, 71, 87, 0.4);
+  transform: translateY(-1px);
+}
+
+.live-button.active:hover {
+  background: #ff3742;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(255, 71, 87, 0.5);
+}
+
 h2 {
   color: #1a1a1a; /* Very dark text for all headings */
   font-weight: 600;

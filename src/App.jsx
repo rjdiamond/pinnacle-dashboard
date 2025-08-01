@@ -52,6 +52,11 @@ const EVENTS = {
     startDate: new Date('2025-07-25T16:00:00.000Z'), // Jul 11, 2025 9:00 AM PDT
     endDate: new Date('2025-07-28T17:15:00.000Z'),   // Jul 14, 2025 9:05 AM PDT
     title: 'Event VI (July 25th – July 28th, 2025)'
+  },
+  'Event VII': {
+    startDate: new Date('2025-08-01T16:00:00.000Z'), // Aug 1, 2025 9:00 AM PDT
+    endDate: new Date('2025-08-04T17:15:00.000Z'),   // Aug 4, 2025 9:05 AM PDT
+    title: 'Event VII (August 1st – August 4th, 2025)'
   }
 };
 
@@ -60,7 +65,9 @@ function App() {
   const [fullData, setFullData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState('Event VI');
+  const [selectedEvent, setSelectedEvent] = useState('Event VII');
+  const [lastDataLoad, setLastDataLoad] = useState(null);
+  const [dataLoadCount, setDataLoadCount] = useState(0);
 //  const [autoRefresh, setAutoRefresh] = useState(true);
 
   // Filter data based on selected event
@@ -87,45 +94,54 @@ function App() {
   };
 
   useEffect(() => {
-    loadData(); // Initial load
-  
+    loadData(); // Initial load only
+  }, []); // Remove selectedEvent dependency
+
+  useEffect(() => {
+    // Auto-refresh only for live events, but don't reload when switching events
     let interval;
   
-    if (selectedEvent === 'Event VI') {  // For auto-refresh && autoRefresh)
+    if (selectedEvent === 'Event VII') {  // For auto-refresh && autoRefresh)
       interval = setInterval(() => {
         console.log('[Live] Auto-refreshing...');
         loadData();
-      }, 600000000); // every 600,000 seconds
+      }, 60000); // every 60 seconds
     }
   
     return () => clearInterval(interval);
-  }, [selectedEvent]); // For auto-fresh autoRefresh
+  }, [selectedEvent]); // Only for auto-refresh setup
 
   const loadData = () => {
+    const now = new Date();
+    setLastDataLoad(now);
+    setDataLoadCount(prev => prev + 1);
+    
+    console.log(`[Data Load #${dataLoadCount + 1}] Fetching fresh data at ${now.toLocaleTimeString()}`);
+    
     fetchSheetData()
       .then(({ filteredData, fullData }) => {
         setFullData(fullData);
         const eventFilteredData = filterDataByEvent(fullData, selectedEvent);
         setData(eventFilteredData);
+        console.log(`[Data Load Complete] ${fullData.length} total records, ${eventFilteredData.length} for ${selectedEvent}`);
       })
       .catch((err) => setError(err.message || 'Error loading data'))
       .finally(() => setLoading(false));
   };
   
 
-  // Handle event selection with smooth transitions
+  // Handle event selection with smooth transitions (no data reload needed)
   const handleEventChange = (eventKey) => {
     if (eventKey === selectedEvent) return; // Prevent unnecessary re-renders
     
-    // Add loading state for smooth transition
- //   setLoading(true);
+    console.log(`Switching to ${eventKey} (filtering existing data)`);
     
     // Small delay to show transition
     setTimeout(() => {
       setSelectedEvent(eventKey);
+      // Filter existing fullData instead of reloading
       const eventFilteredData = filterDataByEvent(fullData, eventKey);
       setData(eventFilteredData);
- //     setLoading(false);
     }, 150);
   };
 
@@ -147,6 +163,11 @@ function App() {
       <h2 className="event-subtitle">{EVENTS[selectedEvent].title}</h2>
       <p style={{ textAlign: 'center', color: '#666', marginBottom: '0.5rem', fontSize: '1rem' }}>
         Data Auto-Refreshes During Live Events
+        {lastDataLoad && (
+          <span style={{ display: 'block', fontSize: '0.9rem', color: '#888', marginTop: '0.25rem' }}>
+            Last updated: {lastDataLoad.toLocaleTimeString()} | Load #{dataLoadCount}
+          </span>
+        )}
       </p>
       
       {/* Event Filter Buttons */}
@@ -188,10 +209,16 @@ function App() {
           Event V
         </button>
         <button 
-          className={`live-button ${selectedEvent === 'Event VI' ? 'active' : ''}`}
+          className={`event-button ${selectedEvent === 'Event VI' ? 'active' : ''}`}
           onClick={() => handleEventChange('Event VI')}
         >
           Event VI
+        </button>
+        <button 
+          className={`live-button ${selectedEvent === 'Event VII' ? 'active' : ''}`}
+          onClick={() => handleEventChange('Event VII')}
+        >
+          Event VII
         </button>
       </div>
       

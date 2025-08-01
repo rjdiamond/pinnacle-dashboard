@@ -11,25 +11,57 @@ function filterDataByDate(data) {
   return data; // Return all data, filtering will be done in App component
 }
 
+// Cache management
+let dataCache = {
+  data: null,
+  timestamp: null,
+  lastModified: null
+};
+
 // Secure data fetching that completely hides the source
 async function fetchFromSecureAPI() {
   try {
+    // Add cache headers if we have a previous timestamp
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (dataCache.lastModified) {
+      headers['If-Modified-Since'] = dataCache.lastModified;
+    }
+    
     // This will be handled by a server-side proxy or API route
     const response = await fetch(API_ENDPOINT, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: headers,
     });
+    
+    if (response.status === 304) {
+      // Not modified, use cached data
+      console.log('Data not modified, using cache');
+      return dataCache.data;
+    }
     
     if (response.ok) {
       const result = await response.json();
       if (result.success && result.data) {
+        // Update cache
+        dataCache = {
+          data: result.data,
+          timestamp: result.timestamp,
+          lastModified: result.lastModified
+        };
+        console.log(`Fresh data loaded: ${result.size} bytes at ${result.timestamp}`);
         return result.data; // This is the CSV string
       }
     }
   } catch (error) {
     console.warn('Analytics service temporarily unavailable');
+    // Return cached data if available
+    if (dataCache.data) {
+      console.log('Using cached data due to network error');
+      return dataCache.data;
+    }
   }
   return null;
 }
