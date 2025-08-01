@@ -267,7 +267,7 @@ function App() {
         Data Auto-Refreshes During Live Events
         {lastDataLoad && (
           <span style={{ display: 'block', fontSize: '0.9rem', color: '#888', marginTop: '0.25rem' }}>
-            Last updated: {lastDataLoad.toLocaleTimeString()} | Load #{dataLoadCount}
+            Last updated locally: {lastDataLoad.toLocaleTimeString()} | Local refresh: #{dataLoadCount}
           </span>
         )}
       </p>
