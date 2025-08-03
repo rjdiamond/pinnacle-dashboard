@@ -299,13 +299,13 @@ h2 {
 
 /* Make User Search chart-container narrower */
 .usersearch-chart-container {
-  width: 60% !important;
+  width: 100% !important;
   min-width: 0 !important;
   margin: 0 auto !important;
 }
 /* User Search results table width (inside .usersearch-chart-container) */
 .usersearch-results-table {
-  width: 60% !important;
+  width: 80% !important;
   min-width: 0 !important;
   margin: 0 auto !important;
 }
