@@ -1,3 +1,12 @@
+.usersearch-summary-table {
+  width: 50% !important;
+  min-width: 320px;
+  margin-bottom: 12px;
+  border-collapse: collapse;
+  background: #f7faff;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px #0001;
+}
 .dashboard-container {
   min-width: 1600px;
   width: 100%;

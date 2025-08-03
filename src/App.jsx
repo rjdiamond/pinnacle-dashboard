@@ -498,7 +498,7 @@ function App() {
                     const avgPrice = totalSales > 0 ? totalVolume / totalSales : 0;
                     const fmt = n => `$${n.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                     return (
-                      <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', marginBottom: 12, background: '#f7faff', borderRadius: 8, boxShadow: '0 1px 6px #0001', width: '32%' }}>
+                      <table className="usersearch-results-table usersearch-summary-table">
                         <tbody>
                           <tr>
                             <td style={{ fontWeight: 600, padding: 8, color: '#ff9800' }}>Pin Information</td>
@@ -848,7 +848,7 @@ function App() {
                         &nbsp; | &nbsp;
                         <span style={{ color: '#2196F3', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleDownloadCSV} title="Download visible results as CSV">Export Results</span>
                       </div>
-                      <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', marginBottom: 12, background: '#f7faff', borderRadius: 8, boxShadow: '0 1px 6px #0001', width: '60%' }}>
+                      <table className="usersearch-results-table usersearch-summary-table">
                         <tbody>
                           <tr>
                             <td style={{ fontWeight: 600, padding: 8, color: '#4CAF50' }}>Buying Activity</td>
