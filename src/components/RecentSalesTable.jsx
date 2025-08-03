@@ -130,56 +130,62 @@ export default function RecentSalesTable({ data, fullData }) {
             </tr>
           </thead>
           <tbody>
-            {recentSales.map((sale, index) => (
-              <tr key={`${sale.nft_id}_${sale.updated_at_block_time}_${index}`}>
-                <td className="timestamp">
-                  {formatTimestamp(sale.updated_at_block_time)}
-                </td>
-                <td className="price">
-                  {formatPrice(sale.price)}
-                </td>
-                <td className="avg-price">
-                  {getAveragePrice(sale)}
-                </td>
-                <td className="total-minted">
-                  {getTotalMinted(sale)}
-                </td>
-                <td className="serial-number">
-                  {getSerialNumber(sale)}
-                </td>
-                <td className="buyer">
-                  <div className="user-info">
-                    <div className="username">
-                      {sale.receiver_username || 'Unknown'}
+            {recentSales.map((sale, index) => {
+              const price = parseFloat(sale.price) || 0;
+              let highlightClass = '';
+              if (price >= 1000) highlightClass = 'highlight-gold';
+              else if (price >= 500) highlightClass = 'highlight-green';
+              return (
+                <tr key={`${sale.nft_id}_${sale.updated_at_block_time}_${index}`} className={highlightClass}>
+                  <td className="timestamp">
+                    {formatTimestamp(sale.updated_at_block_time)}
+                  </td>
+                  <td className="price">
+                    {formatPrice(sale.price)}
+                  </td>
+                  <td className="avg-price">
+                    {getAveragePrice(sale)}
+                  </td>
+                  <td className="total-minted">
+                    {getTotalMinted(sale)}
+                  </td>
+                  <td className="serial-number">
+                    {getSerialNumber(sale)}
+                  </td>
+                  <td className="buyer">
+                    <div className="user-info">
+                      <div className="username">
+                        {sale.receiver_username || 'Unknown'}
+                      </div>
+                      <div className="wallet-address">
+                        {formatWalletAddress(sale.receiver_flowAddress)}
+                      </div>
                     </div>
-                    <div className="wallet-address">
-                      {formatWalletAddress(sale.receiver_flowAddress)}
+                  </td>
+                  <td className="seller">
+                    <div className="user-info">
+                      <div className="username">
+                        {sale.seller_username || 'Unknown'}
+                      </div>
+                      <div className="wallet-address">
+                        {formatWalletAddress(sale.seller_flowAddress)}
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td className="seller">
-                  <div className="user-info">
-                    <div className="username">
-                      {sale.seller_username || 'Unknown'}
+                  </td>
+                  <td className="pin-details">
+                    <div className="pin-info">
+                      <div className="set-name">
+                        {sale.nft_edition_set_truncatedName || 'Unknown'}
+                      </div>
+                      <div className="shape-variant">
+                        {sale.nft_edition_shape_name || 'Unknown'} 
+                        {sale.nft_edition_variant && ` (${sale.nft_edition_variant})`}
+                      </div>
                     </div>
-                    <div className="wallet-address">
-                      {formatWalletAddress(sale.seller_flowAddress)}
-                    </div>
-                  </div>
-                </td>
-                <td className="pin-details">
-                  <div className="pin-info">
-                    <div className="set-name">
-                      {sale.nft_edition_set_truncatedName || 'Unknown'}
-                    </div>
-                    <div className="shape-variant">
-                      {sale.nft_edition_shape_name || 'Unknown'} 
-                      {sale.nft_edition_variant && ` (${sale.nft_edition_variant})`}
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
