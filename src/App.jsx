@@ -553,12 +553,48 @@ function App() {
                   const netVolume = totalEarned - totalSpent;
                   const totalTransactions = purchaseCount + salesCount;
                   const fmt = n => `$${n.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                  // CSV download handler
+                  const handleDownloadCSV = () => {
+                    const headers = ['Date','Buyer','Seller','Price','Commission','Pin'];
+                    const rows = searchResults.map(row => {
+                      const date = row.updated_at_block_time ? new Date(row.updated_at_block_time).toLocaleString() : '';
+                      const buyer = row.receiver_username || row.receiver_flowAddress || row.receiver_address || '';
+                      const seller = row.seller_username || row.seller_flowAddress || row.seller_address || '';
+                      const price = row.price !== undefined ? `$${parseFloat(row.price).toLocaleString()}` : '';
+                      const commission = row.commission_amount !== undefined ? `$${parseFloat(row.commission_amount).toLocaleString()}` : '';
+                      // Pin logic matches table
+                      const set = row.nft_edition_set_truncatedName || 'Unknown';
+                      const shape = row.nft_edition_shape_name || 'Unknown';
+                      const variant = row.nft_edition_variant || '';
+                      let pin = `${set} - ${shape}`;
+                      if (variant) pin += ` - ${variant}`;
+                      if ((set === 'Unknown' && shape === 'Unknown' && !variant)) {
+                        pin = row.pin_name || row.pin_id || '';
+                      }
+                      return [date, buyer, seller, price, commission, pin];
+                    });
+                    let csv = headers.join('\t') + '\n';
+                    csv += rows.map(r => r.map(field => String(field).replace(/\t/g, ' ')).join('\t')).join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'user_search_results.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }, 100);
+                  };
                   return (
                     <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                       <div style={{ marginBottom: 10, fontWeight: 500, fontSize: 17, color: '#333', textAlign: 'center' }}>
                         Account Username: <span style={{ color: '#2196F3', fontWeight: 600 }}>{accountUsername || 'N/A'}</span> &nbsp; | &nbsp; Wallet Address: <span style={{ color: '#4CAF50', fontWeight: 600 }}>{accountWallet || 'N/A'}</span>
+                        &nbsp; | &nbsp;
+                        <span style={{ color: '#2196F3', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleDownloadCSV} title="Download visible results as CSV">Download Results</span>
                       </div>
-                      <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', marginBottom: 12, background: '#f7faff', borderRadius: 8, boxShadow: '0 1px 6px #0001' }}>
+                      <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', marginBottom: 12, background: '#f7faff', borderRadius: 8, boxShadow: '0 1px 6px #0001', width: '80%' }}>
                         <tbody>
                           <tr>
                             <td style={{ fontWeight: 600, padding: 8, color: '#2196F3' }}>Buying Activity</td>
@@ -584,7 +620,7 @@ function App() {
                   );
                 })()}
                 <div style={{ maxHeight: 400, overflowY: 'auto', marginTop: 16 }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
+                  <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', fontSize: 15, width: 'auto' }}>
                     <thead>
                       <tr style={{ background: '#e3e3e3' }}>
                         <th style={{ padding: 8, border: '1px solid #ddd' }}>Date</th>
