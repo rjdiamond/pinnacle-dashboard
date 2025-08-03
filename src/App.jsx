@@ -341,14 +341,14 @@ function App() {
                   e.preventDefault();
                   setPinTabSubmitted(true);
                   setLastPinTabInput(pinTabInput);
-                  // Search for exact pin name
+                  // Search for pin name containing the input anywhere (case-insensitive)
                   const input = pinTabInput.trim().toLowerCase();
                   const results = fullData.filter(row => {
                     const set = row.nft_edition_set_truncatedName || '';
                     const shape = row.nft_edition_shape_name || '';
                     const variant = row.nft_edition_variant || '';
                     const pinName = `${set} - ${shape}${variant ? ' - ' + variant : ''}`.toLowerCase();
-                    return pinName === input;
+                    return pinName.includes(input);
                   });
                   setPinTabResults(results);
                 }} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', width: '45%', minWidth: 320 }}>
@@ -373,7 +373,7 @@ function App() {
                         return `${set} - ${shape}${variant ? ' - ' + variant : ''}`;
                       })));
                       setPinTabSuggestions(
-                        pinNames.filter(name => name.toLowerCase().startsWith(val)).slice(0, 10)
+                        pinNames.filter(name => name.toLowerCase().includes(val)).slice(0, 10)
                       );
                     }}
                     style={{ flex: 1, minWidth: 200, padding: 8, borderRadius: 4, border: '1px solid #ccc', fontSize: 16 }}
@@ -403,14 +403,14 @@ function App() {
                             setPinTabSuggestions([]);
                             setPinTabSubmitted(true);
                             setLastPinTabInput(suggestion);
-                            // Search for exact pin name
+                            // Search for pin name containing the suggestion anywhere (case-insensitive)
                             const input = suggestion.trim().toLowerCase();
                             const results = fullData.filter(row => {
                               const set = row.nft_edition_set_truncatedName || '';
                               const shape = row.nft_edition_shape_name || '';
                               const variant = row.nft_edition_variant || '';
                               const pinName = `${set} - ${shape}${variant ? ' - ' + variant : ''}`.toLowerCase();
-                              return pinName === input;
+                              return pinName.includes(input);
                             });
                             setPinTabResults(results);
                           }}
@@ -426,45 +426,84 @@ function App() {
                 <div style={{ color: '#888', textAlign: 'center', marginTop: 16 }}>No results found.</div>
               )}
               {pinTabResults.length > 0 && pinTabSubmitted && (
-                <div style={{ maxHeight: 400, overflowY: 'auto', marginTop: 16 }}>
-                  <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', fontSize: 15, width: 'auto' }}>
-                    <thead>
-                      <tr style={{ background: '#e3e3e3' }}>
-                        <th style={{ padding: 8, border: '1px solid #ddd' }}>Date</th>
-                        <th style={{ padding: 8, border: '1px solid #ddd' }}>Buyer</th>
-                        <th style={{ padding: 8, border: '1px solid #ddd' }}>Seller</th>
-                        <th style={{ padding: 8, border: '1px solid #ddd' }}>Price</th>
-                        <th style={{ padding: 8, border: '1px solid #ddd' }}>Commission</th>
-                        <th style={{ padding: 8, border: '1px solid #ddd' }}>Pin</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pinTabResults.map((row, idx) => (
-                        <tr key={idx}>
-                          <td style={{ padding: 8, border: '1px solid #eee' }}>{row.updated_at_block_time ? new Date(row.updated_at_block_time).toLocaleString() : ''}</td>
-                          <td style={{ padding: 8, border: '1px solid #eee' }}>{row.receiver_username || row.receiver_flowAddress || row.receiver_address}</td>
-                          <td style={{ padding: 8, border: '1px solid #eee' }}>{row.seller_username || row.seller_flowAddress || row.seller_address}</td>
-                          <td style={{ padding: 8, border: '1px solid #eee' }}>${parseFloat(row.price).toLocaleString()}</td>
-                          <td style={{ padding: 8, border: '1px solid #eee' }}>${parseFloat(row.commission_amount).toLocaleString()}</td>
-                          <td style={{ padding: 8, border: '1px solid #eee' }}>{(() => {
-                            const set = row.nft_edition_set_truncatedName || 'Unknown';
-                            const shape = row.nft_edition_shape_name || 'Unknown';
-                            const variant = row.nft_edition_variant || '';
-                            let pin = `${set} - ${shape}`;
-                            if (variant) pin += ` - ${variant}`;
-                            if ((set === 'Unknown' && shape === 'Unknown' && !variant)) {
-                              return row.pin_name || row.pin_id || '';
-                            }
-                            return pin;
-                          })()}</td>
+                <React.Fragment>
+                  {/* Pin Data Summary Row */}
+                  {(() => {
+                    // Pin name from input
+                    const pinName = lastPinTabInput;
+                    const totalSales = pinTabResults.length;
+                    const totalVolume = pinTabResults.reduce((sum, row) => sum + (parseFloat(row.price) || 0), 0);
+                    const avgPrice = totalSales > 0 ? totalVolume / totalSales : 0;
+                    const fmt = n => `$${n.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    return (
+                      <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', marginBottom: 12, background: '#f7faff', borderRadius: 8, boxShadow: '0 1px 6px #0001', width: '80%' }}>
+                        <tbody>
+                          <tr>
+                            <td style={{ fontWeight: 600, padding: 8, color: '#ff9800' }}>Pin Information</td>
+                            <td style={{ padding: 8 }}>Total Sales Volume {fmt(totalVolume)}</td>
+                            <td style={{ padding: 8 }}>Total Sales: {totalSales}</td>
+                            <td style={{ padding: 8 }}>Average Price: {fmt(avgPrice)}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    );
+                  })()}
+                  <div style={{ maxHeight: 400, overflowY: 'auto', marginTop: 16 }}>
+                    <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', fontSize: 15, width: 'auto' }}>
+                      <thead>
+                        <tr style={{ background: '#e3e3e3' }}>
+                          <th style={{ padding: 8, border: '1px solid #ddd' }}>Date</th>
+                          <th style={{ padding: 8, border: '1px solid #ddd' }}>Buyer</th>
+                          <th style={{ padding: 8, border: '1px solid #ddd' }}>Seller</th>
+                          <th style={{ padding: 8, border: '1px solid #ddd' }}>Price</th>
+                          <th style={{ padding: 8, border: '1px solid #ddd' }}>Commission</th>
+                          <th style={{ padding: 8, border: '1px solid #ddd' }}>Serial #</th>
+                          <th style={{ padding: 8, border: '1px solid #ddd' }}>Pin</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div style={{ color: '#888', textAlign: 'right', marginTop: 8 }}>
-                    Showing {pinTabResults.length} result{pinTabResults.length !== 1 ? 's' : ''}
+                      </thead>
+                      <tbody>
+                        {pinTabResults.map((row, idx) => {
+                          // Serial number logic from TopSalesTable
+                          const serial = row.nft_serial_number || row.serial_number;
+                          let serialDisplay = '-';
+                          if (
+                            serial !== undefined &&
+                            serial !== null &&
+                            serial !== '' &&
+                            serial !== 'null' &&
+                            serial !== 'undefined'
+                          ) {
+                            serialDisplay = `#${serial}`;
+                          }
+                          return (
+                            <tr key={idx}>
+                              <td style={{ padding: 8, border: '1px solid #eee' }}>{row.updated_at_block_time ? new Date(row.updated_at_block_time).toLocaleString() : ''}</td>
+                              <td style={{ padding: 8, border: '1px solid #eee' }}>{row.receiver_username || row.receiver_flowAddress || row.receiver_address}</td>
+                              <td style={{ padding: 8, border: '1px solid #eee' }}>{row.seller_username || row.seller_flowAddress || row.seller_address}</td>
+                              <td style={{ padding: 8, border: '1px solid #eee' }}>${parseFloat(row.price).toLocaleString()}</td>
+                              <td style={{ padding: 8, border: '1px solid #eee' }}>${parseFloat(row.commission_amount).toLocaleString()}</td>
+                              <td style={{ padding: 8, border: '1px solid #eee' }}>{serialDisplay}</td>
+                              <td style={{ padding: 8, border: '1px solid #eee' }}>{(() => {
+                                const set = row.nft_edition_set_truncatedName || 'Unknown';
+                                const shape = row.nft_edition_shape_name || 'Unknown';
+                                const variant = row.nft_edition_variant || '';
+                                let pin = `${set} - ${shape}`;
+                                if (variant) pin += ` - ${variant}`;
+                                if ((set === 'Unknown' && shape === 'Unknown' && !variant)) {
+                                  return row.pin_name || row.pin_id || '';
+                                }
+                                return pin;
+                              })()}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                    <div style={{ color: '#888', textAlign: 'right', marginTop: 8 }}>
+                      Showing {pinTabResults.length} result{pinTabResults.length !== 1 ? 's' : ''}
+                    </div>
                   </div>
-                </div>
+                </React.Fragment>
               )}
             </div>
           </div>
