@@ -73,6 +73,7 @@ function App() {
   const [searchInput, setSearchInput] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
+  const [lastSearchInput, setLastSearchInput] = useState('');
 
   // Filter data based on selected event
   const filterDataByEvent = (fullData, eventKey) => {
@@ -253,6 +254,7 @@ function App() {
   const handleUserSearch = (e) => {
     e.preventDefault();
     setSearchSubmitted(true);
+    setLastSearchInput(searchInput);
     let results = [];
     const input = searchInput.trim();
     if (!input) {
@@ -490,11 +492,11 @@ function App() {
               {searchResults.length === 0 && searchSubmitted && searchInput && (
                 <div style={{ color: '#888', textAlign: 'center', marginTop: 16 }}>No results found.</div>
               )}
-              {searchResults.length > 0 && (
+              {searchResults.length > 0 && searchSubmitted && (
                 <React.Fragment>
                   {/* User Search Calculations */}
-                {searchInput && (() => {
-                  const input = searchInput.trim();
+                {lastSearchInput && (() => {
+                  const input = lastSearchInput.trim();
                   const isWallet = /^0x?[a-fA-F0-9]{12,}$/.test(input);
                   let lowerInput = input.toLowerCase();
                   let purchases = [], sales = [];
