@@ -385,7 +385,7 @@ h2 {
 
 /* Make User Search chart-container narrower */
 .usersearch-chart-container {
-  width: 65% !important;
+  width: 80% !important;
   min-width: 320px !important;
   margin: 0 auto !important;
 }
