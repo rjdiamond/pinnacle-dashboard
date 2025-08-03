@@ -558,7 +558,7 @@ function App() {
                       <div style={{ marginBottom: 10, fontWeight: 500, fontSize: 17, color: '#333', textAlign: 'center' }}>
                         Account Username: <span style={{ color: '#2196F3', fontWeight: 600 }}>{accountUsername || 'N/A'}</span> &nbsp; | &nbsp; Wallet Address: <span style={{ color: '#4CAF50', fontWeight: 600 }}>{accountWallet || 'N/A'}</span>
                       </div>
-                      <table style={{ width: '45%', minWidth: 320, borderCollapse: 'collapse', marginBottom: 12, background: '#f7faff', borderRadius: 8, boxShadow: '0 1px 6px #0001' }}>
+                      <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', marginBottom: 12, background: '#f7faff', borderRadius: 8, boxShadow: '0 1px 6px #0001' }}>
                         <tbody>
                           <tr>
                             <td style={{ fontWeight: 600, padding: 8, color: '#2196F3' }}>Buying Activity</td>
