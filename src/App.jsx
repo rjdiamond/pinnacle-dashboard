@@ -502,7 +502,7 @@ function App() {
                         <tbody>
                           <tr>
                             <td style={{ fontWeight: 600, padding: 8, color: '#ff9800' }}>Pin Information</td>
-                            <td style={{ padding: 8 }}>Total Sales Volume {fmt(totalVolume)}</td>
+                            <td style={{ padding: 8 }}>Total Sales Volume: {fmt(totalVolume)}</td>
                             <td style={{ padding: 8 }}>Total Sales: {totalSales}</td>
                             <td style={{ padding: 8 }}>Average Price: {fmt(avgPrice)}</td>
                           </tr>
@@ -846,25 +846,25 @@ function App() {
                       <div style={{ marginBottom: 10, fontWeight: 500, fontSize: 17, color: '#333', textAlign: 'center' }}>
                         Account Username: <span style={{ color: '#2196F3', fontWeight: 600 }}>{accountUsername || 'N/A'}</span> &nbsp; | &nbsp; Wallet Address: <span style={{ color: '#4CAF50', fontWeight: 600 }}>{accountWallet || 'N/A'}</span>
                         &nbsp; | &nbsp;
-                        <span style={{ color: '#2196F3', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleDownloadCSV} title="Download visible results as CSV">Download Results</span>
+                        <span style={{ color: '#2196F3', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }} onClick={handleDownloadCSV} title="Download visible results as CSV">Export Results</span>
                       </div>
-                      <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', marginBottom: 12, background: '#f7faff', borderRadius: 8, boxShadow: '0 1px 6px #0001', width: '80%' }}>
+                      <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', marginBottom: 12, background: '#f7faff', borderRadius: 8, boxShadow: '0 1px 6px #0001', width: '60%' }}>
                         <tbody>
                           <tr>
-                            <td style={{ fontWeight: 600, padding: 8, color: '#2196F3' }}>Buying Activity</td>
-                            <td style={{ padding: 8 }}>Total Spent {fmt(totalSpent)}</td>
+                            <td style={{ fontWeight: 600, padding: 8, color: '#4CAF50' }}>Buying Activity</td>
+                            <td style={{ padding: 8 }}>Total Spent: {fmt(totalSpent)}</td>
                             <td style={{ padding: 8 }}>Purchases: {purchaseCount}</td>
                             <td style={{ padding: 8 }}>Average: {fmt(avgSpent)}</td>
                           </tr>
                           <tr>
-                            <td style={{ fontWeight: 600, padding: 8, color: '#4CAF50' }}>Selling Activity</td>
-                            <td style={{ padding: 8 }}>Total Earned {fmt(totalEarned)}</td>
+                            <td style={{ fontWeight: 600, padding: 8, color: '#eb7750ff' }}>Selling Activity</td>
+                            <td style={{ padding: 8 }}>Total Earned: {fmt(totalEarned)}</td>
                             <td style={{ padding: 8 }}>Sales: {salesCount}</td>
                             <td style={{ padding: 8 }}>Average: {fmt(avgEarned)}</td>
                           </tr>
                           <tr>
                             <td style={{ fontWeight: 600, padding: 8, color: '#333' }}>Summary</td>
-                            <td style={{ padding: 8 }}>Net Volume {fmt(netVolume)}</td>
+                            <td style={{ padding: 8 }}>Net Volume: {fmt(netVolume)}</td>
                             <td style={{ padding: 8 }}>Total Transactions: {totalTransactions}</td>
                             <td></td>
                           </tr>
