@@ -5,76 +5,7 @@
 .usersearch-summary-table td {
   text-align: center !important;
 }
-/* --- Mobile Optimizations for User Search & Pin Data Tabs --- */
-@media (max-width: 1200px) {
-  .usersearch-summary-table-wrapper {
-    max-width: 100vw;
-    padding: 0 2vw;
-    box-sizing: border-box;
-  }
-  .usersearch-summary-table {
-    width: 100% !important;
-    max-width: 100vw !important;
-    font-size: 13px;
-    word-break: break-word;
-    display: block;
-    overflow-x: auto;
-  }
-  .usersearch-results-table {
-    width: 100% !important;
-    min-width: 0 !important;
-    font-size: 13px;
-    display: block;
-    overflow-x: auto;
-    box-sizing: border-box;
-    table-layout: auto;
-  }
-  .usersearch-chart-container {
-    width: 100% !important;
-    min-width: unset;
-    padding: 0;
-  }
-  .chart-container {
-    width: 100% !important;
-    min-width: unset;
-    padding: 0;
-  }
-  .charts-row {
-    flex-direction: column !important;
-    gap: 0.5rem !important;
-  }
-  form {
-    width: 100% !important;
-    min-width: unset !important;
-    flex-direction: column !important;
-    gap: 8px !important;
-    align-items: stretch !important;
-  }
-  form input[type="text"] {
-    font-size: 15px;
-    min-width: 0 !important;
-    width: 100% !important;
-    box-sizing: border-box;
-  }
-  form button {
-    width: 100%;
-    font-size: 15px;
-    padding: 10px 0;
-  }
-  .usersearch-results-table th, .usersearch-results-table td {
-    padding: 6px 4px !important;
-    font-size: 13px !important;
-  }
-  .usersearch-results-table thead tr {
-    display: table-row;
-  }
-  .usersearch-results-table tbody tr {
-    display: table-row;
-  }
-  .usersearch-results-table th, .usersearch-results-table td {
-    white-space: nowrap;
-  }
-}
+
 .usersearch-summary-table {
   width: 100% !important;
   min-width: 0;
