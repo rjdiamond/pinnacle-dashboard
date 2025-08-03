@@ -1,3 +1,10 @@
+/* Center text in all usersearch tables */
+.usersearch-results-table th,
+.usersearch-results-table td,
+.usersearch-summary-table th,
+.usersearch-summary-table td {
+  text-align: center !important;
+}
 /* --- Mobile Optimizations for User Search & Pin Data Tabs --- */
 @media (max-width: 700px) {
   .usersearch-summary-table-wrapper {
@@ -379,7 +386,7 @@ h2 {
 
 /* Make User Search chart-container narrower */
 .usersearch-chart-container {
-  width: 40% !important;
+  width: 65% !important;
   min-width: 320px !important;
   margin: 0 auto !important;
 }
