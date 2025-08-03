@@ -287,6 +287,14 @@ h2 {
   flex-wrap: wrap;
 }
 
+
+/* Make User Search chart-container narrower */
+.usersearch-chart-container {
+  width: 75% !important;
+  min-width: 0 !important;
+  margin: 0 auto !important;
+}
+
 .charts-row .chart-container {
   flex: 1;
   min-width: 0;

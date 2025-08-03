@@ -407,7 +407,7 @@ function App() {
             </div>
           </div>
           <div className="charts-row">
-            <div className="chart-container">
+            <div className="chart-container usersearch-chart-container">
               <RecentSalesTable data={data} fullData={fullData} />
             </div>
           </div>
@@ -496,9 +496,9 @@ function App() {
                   const isWallet = /^0x?[a-fA-F0-9]{12,}$/.test(input);
                   let lowerInput = input.toLowerCase();
                   let purchases = [], sales = [];
+                  let normalized = lowerInput.startsWith('0x') ? lowerInput.slice(2) : lowerInput;
                   // Use flowAddress for wallet search, like TopSalesTable
                   if (isWallet) {
-                    let normalized = lowerInput.startsWith('0x') ? lowerInput.slice(2) : lowerInput;
                     purchases = searchResults.filter(row => {
                       const buyer = (row.receiver_flowAddress || row.receiver_address || '').toLowerCase().replace(/^0x/, '');
                       return buyer === normalized;
@@ -511,6 +511,31 @@ function App() {
                     purchases = searchResults.filter(row => (row.receiver_username && row.receiver_username.toLowerCase() === lowerInput));
                     sales = searchResults.filter(row => (row.seller_username && row.seller_username.toLowerCase() === lowerInput));
                   }
+
+                  // Find associated username and wallet address
+                  let accountUsername = '';
+                  let accountWallet = '';
+                  if (isWallet) {
+                    // Find any row with this wallet as receiver or seller
+                    const match = fullData.find(row => {
+                      const buyer = (row.receiver_flowAddress || '').toLowerCase().replace(/^0x/, '');
+                      const seller = (row.seller_flowAddress || '').toLowerCase().replace(/^0x/, '');
+                      return buyer === normalized || seller === normalized;
+                    });
+                    accountWallet = input.startsWith('0x') ? input : '0x' + input;
+                    accountUsername = match ? (match.receiver_username || match.seller_username || '') : '';
+                  } else {
+                    // Find any row with this username as receiver or seller
+                    const match = fullData.find(row =>
+                      (row.receiver_username && row.receiver_username.toLowerCase() === lowerInput) ||
+                      (row.seller_username && row.seller_username.toLowerCase() === lowerInput)
+                    );
+                    accountUsername = input;
+                    // Prefer receiver_flowAddress, fallback to seller_flowAddress
+                    accountWallet = match ? ((match.receiver_flowAddress || match.seller_flowAddress || '')) : '';
+                    if (accountWallet && !accountWallet.startsWith('0x')) accountWallet = '0x' + accountWallet;
+                  }
+
                   const totalSpent = purchases.reduce((sum, row) => sum + (parseFloat(row.price) || 0), 0);
                   const purchaseCount = purchases.length;
                   const avgSpent = purchaseCount > 0 ? totalSpent / purchaseCount : 0;
@@ -521,7 +546,10 @@ function App() {
                   const totalTransactions = purchaseCount + salesCount;
                   const fmt = n => `$${n.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                   return (
-                    <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{ marginBottom: 10, fontWeight: 500, fontSize: 17, color: '#333', textAlign: 'center' }}>
+                        Account Username: <span style={{ color: '#2196F3', fontWeight: 600 }}>{accountUsername || 'N/A'}</span> &nbsp; | &nbsp; Wallet Address: <span style={{ color: '#4CAF50', fontWeight: 600 }}>{accountWallet || 'N/A'}</span>
+                      </div>
                       <table style={{ width: '45%', minWidth: 320, borderCollapse: 'collapse', marginBottom: 12, background: '#f7faff', borderRadius: 8, boxShadow: '0 1px 6px #0001' }}>
                         <tbody>
                           <tr>
