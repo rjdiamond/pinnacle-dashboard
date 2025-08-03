@@ -837,7 +837,7 @@ function App() {
                     }, 100);
                   };
                   return (
-                    <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div className="usersearch-summary-table-wrapper" style={{ marginBottom: 24, flexDirection: 'column', alignItems: 'center' }}>
                       <div style={{ marginBottom: 10, fontWeight: 500, fontSize: 17, color: '#333', textAlign: 'center' }}>
                         Account Username: <span style={{ color: '#2196F3', fontWeight: 600 }}>{accountUsername || 'N/A'}</span> &nbsp; | &nbsp; Wallet Address: <span style={{ color: '#4CAF50', fontWeight: 600 }}>{accountWallet || 'N/A'}</span>
                         &nbsp; | &nbsp;
