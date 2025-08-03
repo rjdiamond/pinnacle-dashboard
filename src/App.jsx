@@ -257,14 +257,15 @@ function App() {
       setSearchResults([]);
       return;
     }
-    // Detect if input is a wallet address (hex, 16+ chars, with or without 0x)
+    // Detect if input is a wallet address (hex, 12+ chars, with or without 0x)
     const isWallet = /^0x?[a-fA-F0-9]{12,}$/.test(input);
     if (isWallet) {
       let normalized = input.toLowerCase();
       if (normalized.startsWith('0x')) normalized = normalized.slice(2);
       results = fullData.filter(row => {
-        const buyer = (row.receiver_address || '').toLowerCase().replace(/^0x/, '');
-        const seller = (row.seller_address || '').toLowerCase().replace(/^0x/, '');
+        // Use receiver_flowAddress and seller_flowAddress, normalize both
+        const buyer = (row.receiver_flowAddress || '').toLowerCase().replace(/^0x/, '');
+        const seller = (row.seller_flowAddress || '').toLowerCase().replace(/^0x/, '');
         return buyer === normalized || seller === normalized;
       });
     } else {
@@ -469,10 +470,10 @@ function App() {
 
       {activeTab === 'usersearch' && (
         <React.Fragment>
+          <h1>Disney Pinnacle Marketplace User Search</h1>
           <div className="charts-row">
             <div className="chart-container">
-              <h2 style={{ textAlign: 'center', marginBottom: 24 }}>User Search</h2>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24, marginTop: 24 }}>
                 <form onSubmit={handleUserSearch} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', width: '45%', minWidth: 320 }}>
                   <input
                     type="text"
