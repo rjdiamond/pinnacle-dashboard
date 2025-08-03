@@ -72,6 +72,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' or 'usersearch'
   const [searchInput, setSearchInput] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [searchSubmitted, setSearchSubmitted] = useState(false);
 
   // Filter data based on selected event
   const filterDataByEvent = (fullData, eventKey) => {
@@ -251,6 +252,7 @@ function App() {
   // --- User Search Logic ---
   const handleUserSearch = (e) => {
     e.preventDefault();
+    setSearchSubmitted(true);
     let results = [];
     const input = searchInput.trim();
     if (!input) {
@@ -485,7 +487,7 @@ function App() {
                   <button type="submit" style={{ padding: '8px 20px', borderRadius: 4, background: '#2196F3', color: '#fff', fontWeight: 'bold', border: 'none', fontSize: 16, cursor: 'pointer' }}>Search</button>
                 </form>
               </div>
-              {searchResults.length === 0 && searchInput && (
+              {searchResults.length === 0 && searchSubmitted && searchInput && (
                 <div style={{ color: '#888', textAlign: 'center', marginTop: 16 }}>No results found.</div>
               )}
               {searchResults.length > 0 && (
@@ -512,27 +514,31 @@ function App() {
                     sales = searchResults.filter(row => (row.seller_username && row.seller_username.toLowerCase() === lowerInput));
                   }
 
-                  // Find associated username and wallet address
+                  // Find associated username and wallet address (match by role)
                   let accountUsername = '';
                   let accountWallet = '';
                   if (isWallet) {
-                    // Find any row with this wallet as receiver or seller
-                    const match = fullData.find(row => {
+                    // Prefer receiver_username if wallet is a buyer, else seller_username
+                    const matchBuyer = fullData.find(row => {
                       const buyer = (row.receiver_flowAddress || '').toLowerCase().replace(/^0x/, '');
+                      return buyer === normalized && row.receiver_username;
+                    });
+                    const matchSeller = fullData.find(row => {
                       const seller = (row.seller_flowAddress || '').toLowerCase().replace(/^0x/, '');
-                      return buyer === normalized || seller === normalized;
+                      return seller === normalized && row.seller_username;
                     });
                     accountWallet = input.startsWith('0x') ? input : '0x' + input;
-                    accountUsername = match ? (match.receiver_username || match.seller_username || '') : '';
+                    accountUsername = matchBuyer ? matchBuyer.receiver_username : (matchSeller ? matchSeller.seller_username : '');
                   } else {
-                    // Find any row with this username as receiver or seller
-                    const match = fullData.find(row =>
-                      (row.receiver_username && row.receiver_username.toLowerCase() === lowerInput) ||
-                      (row.seller_username && row.seller_username.toLowerCase() === lowerInput)
+                    // Prefer receiver_flowAddress if username is a buyer, else seller_flowAddress
+                    const matchBuyer = fullData.find(row =>
+                      row.receiver_username && row.receiver_username.toLowerCase() === lowerInput && row.receiver_flowAddress
+                    );
+                    const matchSeller = fullData.find(row =>
+                      row.seller_username && row.seller_username.toLowerCase() === lowerInput && row.seller_flowAddress
                     );
                     accountUsername = input;
-                    // Prefer receiver_flowAddress, fallback to seller_flowAddress
-                    accountWallet = match ? ((match.receiver_flowAddress || match.seller_flowAddress || '')) : '';
+                    accountWallet = matchBuyer ? matchBuyer.receiver_flowAddress : (matchSeller ? matchSeller.seller_flowAddress : '');
                     if (accountWallet && !accountWallet.startsWith('0x')) accountWallet = '0x' + accountWallet;
                   }
 
