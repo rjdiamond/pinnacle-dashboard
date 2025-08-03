@@ -1,3 +1,10 @@
+/* Highlight for high-value sales (scoped to table rows for specificity) */
+.recent-sales-table tr.highlight-green {
+  background: #e8faea !important;
+}
+.recent-sales-table tr.highlight-gold {
+  background: linear-gradient(90deg, #fffbe5 80%, #fff3c4 100%) !important;
+}
 .recent-sales-container {
   width: 100%;
 }
