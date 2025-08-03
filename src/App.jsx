@@ -561,7 +561,7 @@ function App() {
                         })}
                       </tbody>
                     </table>
-                    <div style={{ color: '#888', textAlign: 'right', marginTop: 8 }}>
+                    <div style={{ color: '#888', textAlign: 'center', marginTop: 8 }}>
                       Showing {pinTabResults.length} result{pinTabResults.length !== 1 ? 's' : ''}
                     </div>
                   </div>
@@ -930,7 +930,7 @@ function App() {
                       })}
                     </tbody>
                   </table>
-                  <div style={{ color: '#888', textAlign: 'right', marginTop: 8 }}>
+                  <div style={{ color: '#888', textAlign: 'center', marginTop: 8 }}>
                     Showing {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
                   </div>
                 </div>
