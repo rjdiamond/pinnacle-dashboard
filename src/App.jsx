@@ -351,7 +351,7 @@ function App() {
                     return pinName.includes(input);
                   });
                   setPinTabResults(results);
-                }} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', width: '45%', minWidth: 320 }}>
+                }} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', width: '45%', minWidth: 320, alignItems: 'center', position: 'relative' }}>
                   <input
                     type="text"
                     placeholder="Search a pin by Set, Shape, or Variant..."
@@ -373,12 +373,74 @@ function App() {
                         return `${set} - ${shape}${variant ? ' - ' + variant : ''}`;
                       })));
                       setPinTabSuggestions(
-                        pinNames.filter(name => name.toLowerCase().includes(val)).slice(0, 10)
+                        pinNames.filter(name => name.toLowerCase().includes(val))
                       );
                     }}
                     style={{ flex: 1, minWidth: 200, padding: 8, borderRadius: 4, border: '1px solid #ccc', fontSize: 16 }}
                   />
                   <button type="submit" style={{ padding: '8px 20px', borderRadius: 4, background: '#ff9800', color: '#fff', fontWeight: 'bold', border: 'none', fontSize: 16, cursor: 'pointer' }}>Search</button>
+                  {/* Download CSV Icon */}
+                  <span
+                    title={pinTabResults.length > 0 && pinTabSubmitted ? 'Download results as CSV' : 'No results to download'}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      marginLeft: 8,
+                      opacity: pinTabResults.length > 0 && pinTabSubmitted ? 1 : 0.4,
+                      cursor: pinTabResults.length > 0 && pinTabSubmitted ? 'pointer' : 'not-allowed',
+                      pointerEvents: pinTabResults.length > 0 && pinTabSubmitted ? 'auto' : 'none',
+                      transition: 'opacity 0.2s',
+                    }}
+                    onClick={() => {
+                      if (!(pinTabResults.length > 0 && pinTabSubmitted)) return;
+                      // CSV download logic for Pin Data
+                      const headers = ['Date','Buyer','Seller','Price','Commission','Serial #','Pin'];
+                      const rows = pinTabResults.map(row => {
+                        const date = row.updated_at_block_time ? new Date(row.updated_at_block_time).toLocaleString() : '';
+                        const buyer = row.receiver_username || row.receiver_flowAddress || row.receiver_address || '';
+                        const seller = row.seller_username || row.seller_flowAddress || row.seller_address || '';
+                        const price = row.price !== undefined ? `$${parseFloat(row.price).toLocaleString()}` : '';
+                        const commission = row.commission_amount !== undefined ? `$${parseFloat(row.commission_amount).toLocaleString()}` : '';
+                        // Serial number logic from TopSalesTable
+                        const serial = row.nft_serial_number || row.serial_number;
+                        let serialDisplay = '-';
+                        if (
+                          serial !== undefined &&
+                          serial !== null &&
+                          serial !== '' &&
+                          serial !== 'null' &&
+                          serial !== 'undefined'
+                        ) {
+                          serialDisplay = `#${serial}`;
+                        }
+                        // Pin logic matches table
+                        const set = row.nft_edition_set_truncatedName || 'Unknown';
+                        const shape = row.nft_edition_shape_name || 'Unknown';
+                        const variant = row.nft_edition_variant || '';
+                        let pin = `${set} - ${shape}`;
+                        if (variant) pin += ` - ${variant}`;
+                        if ((set === 'Unknown' && shape === 'Unknown' && !variant)) {
+                          pin = row.pin_name || row.pin_id || '';
+                        }
+                        return [date, buyer, seller, price, commission, serialDisplay, pin];
+                      });
+                      let csv = headers.join('\t') + '\n';
+                      csv += rows.map(r => r.map(field => String(field).replace(/\t/g, ' ')).join('\t')).join('\n');
+                      const blob = new Blob([csv], { type: 'text/csv' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = 'pin_data_results.csv';
+                      document.body.appendChild(a);
+                      a.click();
+                      setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                      }, 100);
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }} className="lucide lucide-download" aria-hidden="true"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg>
+                  </span>
                   {/* Suggestions dropdown */}
                   {pinTabSuggestions.length > 0 && (
                     <div style={{
@@ -436,7 +498,7 @@ function App() {
                     const avgPrice = totalSales > 0 ? totalVolume / totalSales : 0;
                     const fmt = n => `$${n.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                     return (
-                      <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', marginBottom: 12, background: '#f7faff', borderRadius: 8, boxShadow: '0 1px 6px #0001', width: '80%' }}>
+                      <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', marginBottom: 12, background: '#f7faff', borderRadius: 8, boxShadow: '0 1px 6px #0001', width: '32%' }}>
                         <tbody>
                           <tr>
                             <td style={{ fontWeight: 600, padding: 8, color: '#ff9800' }}>Pin Information</td>
