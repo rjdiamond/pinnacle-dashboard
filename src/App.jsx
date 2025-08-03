@@ -75,6 +75,13 @@ function App() {
   const [searchSubmitted, setSearchSubmitted] = useState(false);
   const [lastSearchInput, setLastSearchInput] = useState('');
 
+  // Pin Data tab state
+  const [pinTabInput, setPinTabInput] = useState('');
+  const [pinTabResults, setPinTabResults] = useState([]);
+  const [pinTabSubmitted, setPinTabSubmitted] = useState(false);
+  const [pinTabSuggestions, setPinTabSuggestions] = useState([]);
+  const [lastPinTabInput, setLastPinTabInput] = useState('');
+
   // Filter data based on selected event
   const filterDataByEvent = (fullData, eventKey) => {
     const event = EVENTS[eventKey];
@@ -264,10 +271,10 @@ function App() {
     // Detect if input is a wallet address (hex, 12+ chars, with or without 0x)
     const isWallet = /^0x?[a-fA-F0-9]{12,}$/.test(input);
     if (isWallet) {
-      let normalized = input.toLowerCase();
-      if (normalized.startsWith('0x')) normalized = normalized.slice(2);
+      // Normalize input: remove 0x if present, lowercase
+      let normalized = input.toLowerCase().replace(/^0x/, '');
       results = fullData.filter(row => {
-        // Use receiver_flowAddress and seller_flowAddress, normalize both
+        // Normalize both addresses: remove 0x if present, lowercase
         const buyer = (row.receiver_flowAddress || '').toLowerCase().replace(/^0x/, '');
         const seller = (row.seller_flowAddress || '').toLowerCase().replace(/^0x/, '');
         return buyer === normalized || seller === normalized;
@@ -316,7 +323,153 @@ function App() {
         >
           User Search
         </button>
+        <button
+          className={activeTab === 'pindata' ? 'active' : ''}
+          style={{ padding: '0.5rem 1.5rem', fontWeight: 'bold', borderRadius: '6px', border: '1px solid #ff9800', background: activeTab === 'pindata' ? '#ff9800' : '#fff', color: activeTab === 'pindata' ? '#fff' : '#ff9800', cursor: 'pointer' }}
+          onClick={() => setActiveTab('pindata')}
+        >
+          Pin Data
+        </button>
       </div>
+      {activeTab === 'pindata' && (
+        <React.Fragment>
+          <h1>Disney Pinnacle Marketplace Pin Data</h1>
+          <div className="charts-row">
+            <div className="chart-container">
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24, marginTop: 24, position: 'relative' }}>
+                <form onSubmit={e => {
+                  e.preventDefault();
+                  setPinTabSubmitted(true);
+                  setLastPinTabInput(pinTabInput);
+                  // Search for exact pin name
+                  const input = pinTabInput.trim().toLowerCase();
+                  const results = fullData.filter(row => {
+                    const set = row.nft_edition_set_truncatedName || '';
+                    const shape = row.nft_edition_shape_name || '';
+                    const variant = row.nft_edition_variant || '';
+                    const pinName = `${set} - ${shape}${variant ? ' - ' + variant : ''}`.toLowerCase();
+                    return pinName === input;
+                  });
+                  setPinTabResults(results);
+                }} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', width: '45%', minWidth: 320 }}>
+                  <input
+                    type="text"
+                    placeholder="Search a pin by Set, Shape, or Variant..."
+                    value={pinTabInput}
+                    onChange={e => {
+                      setPinTabInput(e.target.value);
+                      setPinTabSubmitted(false);
+                      // Dynamic suggestions
+                      const val = e.target.value.trim().toLowerCase();
+                      if (!val) {
+                        setPinTabSuggestions([]);
+                        return;
+                      }
+                      // Build unique pin names
+                      const pinNames = Array.from(new Set(fullData.map(row => {
+                        const set = row.nft_edition_set_truncatedName || '';
+                        const shape = row.nft_edition_shape_name || '';
+                        const variant = row.nft_edition_variant || '';
+                        return `${set} - ${shape}${variant ? ' - ' + variant : ''}`;
+                      })));
+                      setPinTabSuggestions(
+                        pinNames.filter(name => name.toLowerCase().startsWith(val)).slice(0, 10)
+                      );
+                    }}
+                    style={{ flex: 1, minWidth: 200, padding: 8, borderRadius: 4, border: '1px solid #ccc', fontSize: 16 }}
+                  />
+                  <button type="submit" style={{ padding: '8px 20px', borderRadius: 4, background: '#ff9800', color: '#fff', fontWeight: 'bold', border: 'none', fontSize: 16, cursor: 'pointer' }}>Search</button>
+                  {/* Suggestions dropdown */}
+                  {pinTabSuggestions.length > 0 && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      background: '#fff',
+                      border: '1px solid #ccc',
+                      borderRadius: 4,
+                      zIndex: 10,
+                      maxHeight: 220,
+                      overflowY: 'auto',
+                      boxShadow: '0 2px 8px #0002',
+                    }}>
+                      {pinTabSuggestions.map((suggestion, idx) => (
+                        <div
+                          key={idx}
+                          style={{ padding: 10, cursor: 'pointer', borderBottom: idx !== pinTabSuggestions.length - 1 ? '1px solid #eee' : 'none' }}
+                          onClick={() => {
+                            setPinTabInput(suggestion);
+                            setPinTabSuggestions([]);
+                            setPinTabSubmitted(true);
+                            setLastPinTabInput(suggestion);
+                            // Search for exact pin name
+                            const input = suggestion.trim().toLowerCase();
+                            const results = fullData.filter(row => {
+                              const set = row.nft_edition_set_truncatedName || '';
+                              const shape = row.nft_edition_shape_name || '';
+                              const variant = row.nft_edition_variant || '';
+                              const pinName = `${set} - ${shape}${variant ? ' - ' + variant : ''}`.toLowerCase();
+                              return pinName === input;
+                            });
+                            setPinTabResults(results);
+                          }}
+                        >
+                          {suggestion}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </form>
+              </div>
+              {pinTabResults.length === 0 && pinTabSubmitted && pinTabInput && (
+                <div style={{ color: '#888', textAlign: 'center', marginTop: 16 }}>No results found.</div>
+              )}
+              {pinTabResults.length > 0 && pinTabSubmitted && (
+                <div style={{ maxHeight: 400, overflowY: 'auto', marginTop: 16 }}>
+                  <table className="usersearch-results-table" style={{ minWidth: 320, borderCollapse: 'collapse', fontSize: 15, width: 'auto' }}>
+                    <thead>
+                      <tr style={{ background: '#e3e3e3' }}>
+                        <th style={{ padding: 8, border: '1px solid #ddd' }}>Date</th>
+                        <th style={{ padding: 8, border: '1px solid #ddd' }}>Buyer</th>
+                        <th style={{ padding: 8, border: '1px solid #ddd' }}>Seller</th>
+                        <th style={{ padding: 8, border: '1px solid #ddd' }}>Price</th>
+                        <th style={{ padding: 8, border: '1px solid #ddd' }}>Commission</th>
+                        <th style={{ padding: 8, border: '1px solid #ddd' }}>Pin</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pinTabResults.map((row, idx) => (
+                        <tr key={idx}>
+                          <td style={{ padding: 8, border: '1px solid #eee' }}>{row.updated_at_block_time ? new Date(row.updated_at_block_time).toLocaleString() : ''}</td>
+                          <td style={{ padding: 8, border: '1px solid #eee' }}>{row.receiver_username || row.receiver_flowAddress || row.receiver_address}</td>
+                          <td style={{ padding: 8, border: '1px solid #eee' }}>{row.seller_username || row.seller_flowAddress || row.seller_address}</td>
+                          <td style={{ padding: 8, border: '1px solid #eee' }}>${parseFloat(row.price).toLocaleString()}</td>
+                          <td style={{ padding: 8, border: '1px solid #eee' }}>${parseFloat(row.commission_amount).toLocaleString()}</td>
+                          <td style={{ padding: 8, border: '1px solid #eee' }}>{(() => {
+                            const set = row.nft_edition_set_truncatedName || 'Unknown';
+                            const shape = row.nft_edition_shape_name || 'Unknown';
+                            const variant = row.nft_edition_variant || '';
+                            let pin = `${set} - ${shape}`;
+                            if (variant) pin += ` - ${variant}`;
+                            if ((set === 'Unknown' && shape === 'Unknown' && !variant)) {
+                              return row.pin_name || row.pin_id || '';
+                            }
+                            return pin;
+                          })()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div style={{ color: '#888', textAlign: 'right', marginTop: 8 }}>
+                    Showing {pinTabResults.length} result{pinTabResults.length !== 1 ? 's' : ''}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </React.Fragment>
+      )}
 
       {activeTab === 'dashboard' && (
         <React.Fragment>
@@ -486,7 +639,7 @@ function App() {
                     onChange={e => setSearchInput(e.target.value)}
                     style={{ flex: 1, minWidth: 200, padding: 8, borderRadius: 4, border: '1px solid #ccc', fontSize: 16 }}
                   />
-                  <button type="submit" style={{ padding: '8px 20px', borderRadius: 4, background: '#2196F3', color: '#fff', fontWeight: 'bold', border: 'none', fontSize: 16, cursor: 'pointer' }}>Search</button>
+                  <button type="submit" style={{ padding: '8px 20px', borderRadius: 4, background: '#4CAF50', color: '#fff', fontWeight: 'bold', border: 'none', fontSize: 16, cursor: 'pointer' }}>Search</button>
                 </form>
               </div>
               {searchResults.length === 0 && searchSubmitted && searchInput && (
