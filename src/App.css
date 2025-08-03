@@ -14,12 +14,13 @@
     overflow-x: auto;
   }
   .usersearch-results-table {
-    min-width: 520px;
     width: 100% !important;
+    min-width: 0 !important;
     font-size: 13px;
     display: block;
     overflow-x: auto;
     box-sizing: border-box;
+    table-layout: auto;
   }
   .usersearch-chart-container {
     width: 100% !important;
