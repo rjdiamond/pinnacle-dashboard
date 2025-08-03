@@ -503,7 +503,21 @@ function App() {
                       <td style={{ padding: 8, border: '1px solid #eee' }}>{row.seller_username || row.seller_address}</td>
                       <td style={{ padding: 8, border: '1px solid #eee' }}>${parseFloat(row.price).toLocaleString()}</td>
                       <td style={{ padding: 8, border: '1px solid #eee' }}>${parseFloat(row.commission_amount).toLocaleString()}</td>
-                      <td style={{ padding: 8, border: '1px solid #eee' }}>{row.pin_name || row.pin_id}</td>
+                      <td style={{ padding: 8, border: '1px solid #eee' }}>
+                        {(() => {
+                          // Match TopSalesTable: use nft_edition_set_truncatedName, nft_edition_shape_name, nft_edition_variant
+                          const set = row.nft_edition_set_truncatedName || 'Unknown';
+                          const shape = row.nft_edition_shape_name || 'Unknown';
+                          const variant = row.nft_edition_variant || '';
+                          let pin = `${set} - ${shape}`;
+                          if (variant) pin += ` - ${variant}`;
+                          // If all are Unknown or empty, fallback
+                          if ((set === 'Unknown' && shape === 'Unknown' && !variant)) {
+                            return row.pin_name || row.pin_id || '';
+                          }
+                          return pin;
+                        })()}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
