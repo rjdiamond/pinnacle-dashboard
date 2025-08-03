@@ -314,7 +314,7 @@ function App() {
       </div>
 
       {activeTab === 'dashboard' && (
-        <>
+        <React.Fragment>
           <h1>Disney Pinnacle Marketplace Events</h1>
           <h2 className="event-subtitle">{EVENTS[selectedEvent].title}</h2>
           <p style={{ textAlign: 'center', color: '#666', marginBottom: '0.5rem', fontSize: '1rem' }}>
@@ -382,6 +382,7 @@ function App() {
               Giveaway
             </button>
           </div>
+          {/* End User Search chart-container */}
           <div className="summary-stats">
             <div className="stat-card">
               <div className="stat-number" style={{ color: '#2196F3' }}>{totalTransactions.toLocaleString()}</div>
@@ -463,74 +464,143 @@ function App() {
           <div style={{ textAlign: 'center', marginTop: '2rem', color: '#666' }}>
             Data loaded: {data.length} transactions
           </div>
-        </>
+        </React.Fragment>
       )}
 
       {activeTab === 'usersearch' && (
-        <div style={{ maxWidth: 700, margin: '0 auto', background: '#f9f9f9', borderRadius: 8, padding: 24, boxShadow: '0 2px 8px #0001' }}>
-          <h2 style={{ textAlign: 'center', marginBottom: 24 }}>User Search</h2>
-          <form onSubmit={handleUserSearch} style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <input
-              type="text"
-              placeholder="Search a collectors username or wallet address here..."
-              value={searchInput}
-              onChange={e => setSearchInput(e.target.value)}
-              style={{ flex: 1, minWidth: 320, padding: 8, borderRadius: 4, border: '1px solid #ccc', fontSize: 16 }}
-            />
-            <button type="submit" style={{ padding: '8px 20px', borderRadius: 4, background: '#2196F3', color: '#fff', fontWeight: 'bold', border: 'none', fontSize: 16, cursor: 'pointer' }}>Search</button>
-          </form>
-          {searchResults.length === 0 && searchInput && (
-            <div style={{ color: '#888', textAlign: 'center', marginTop: 16 }}>No results found.</div>
-          )}
-          {searchResults.length > 0 && (
-            <div style={{ maxHeight: 400, overflowY: 'auto', marginTop: 16 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
-                <thead>
-                  <tr style={{ background: '#e3e3e3' }}>
-                    <th style={{ padding: 8, border: '1px solid #ddd' }}>Date</th>
-                    <th style={{ padding: 8, border: '1px solid #ddd' }}>Buyer</th>
-                    <th style={{ padding: 8, border: '1px solid #ddd' }}>Seller</th>
-                    <th style={{ padding: 8, border: '1px solid #ddd' }}>Price</th>
-                    <th style={{ padding: 8, border: '1px solid #ddd' }}>Commission</th>
-                    <th style={{ padding: 8, border: '1px solid #ddd' }}>Pin</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {searchResults.map((row, idx) => (
-                    <tr key={idx}>
-                      <td style={{ padding: 8, border: '1px solid #eee' }}>{row.updated_at_block_time ? new Date(row.updated_at_block_time).toLocaleString() : ''}</td>
-                      <td style={{ padding: 8, border: '1px solid #eee' }}>{row.receiver_username || row.receiver_address}</td>
-                      <td style={{ padding: 8, border: '1px solid #eee' }}>{row.seller_username || row.seller_address}</td>
-                      <td style={{ padding: 8, border: '1px solid #eee' }}>${parseFloat(row.price).toLocaleString()}</td>
-                      <td style={{ padding: 8, border: '1px solid #eee' }}>${parseFloat(row.commission_amount).toLocaleString()}</td>
-                      <td style={{ padding: 8, border: '1px solid #eee' }}>
-                        {(() => {
-                          // Match TopSalesTable: use nft_edition_set_truncatedName, nft_edition_shape_name, nft_edition_variant
-                          const set = row.nft_edition_set_truncatedName || 'Unknown';
-                          const shape = row.nft_edition_shape_name || 'Unknown';
-                          const variant = row.nft_edition_variant || '';
-                          let pin = `${set} - ${shape}`;
-                          if (variant) pin += ` - ${variant}`;
-                          // If all are Unknown or empty, fallback
-                          if ((set === 'Unknown' && shape === 'Unknown' && !variant)) {
-                            return row.pin_name || row.pin_id || '';
-                          }
-                          return pin;
-                        })()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div style={{ color: '#888', textAlign: 'right', marginTop: 8 }}>
-                Showing {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
-              </div>
+        <React.Fragment>
+          <div className="charts-row">
+            <div className="chart-container">
+              <h2 style={{ textAlign: 'center', marginBottom: 24 }}>User Search</h2>
+              <form onSubmit={handleUserSearch} style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
+                <input
+                  type="text"
+                  placeholder="Search a collectors username or wallet address here..."
+                  value={searchInput}
+                  onChange={e => setSearchInput(e.target.value)}
+                  style={{ flex: 1, minWidth: 320, padding: 8, borderRadius: 4, border: '1px solid #ccc', fontSize: 16 }}
+                />
+                <button type="submit" style={{ padding: '8px 20px', borderRadius: 4, background: '#2196F3', color: '#fff', fontWeight: 'bold', border: 'none', fontSize: 16, cursor: 'pointer' }}>Search</button>
+              </form>
+              {searchResults.length === 0 && searchInput && (
+                <div style={{ color: '#888', textAlign: 'center', marginTop: 16 }}>No results found.</div>
+              )}
+              {searchResults.length > 0 && (
+                <React.Fragment>
+                  {/* User Search Calculations */}
+                  {searchInput && (() => {
+                    const input = searchInput.trim();
+                    const isWallet = /^0x?[a-fA-F0-9]{12,}$/.test(input);
+                    let lowerInput = input.toLowerCase();
+                    let purchases = [], sales = [], username = '';
+                    if (isWallet) {
+                      // Normalize wallet address (remove 0x)
+                      let normalized = lowerInput.startsWith('0x') ? lowerInput.slice(2) : lowerInput;
+                      purchases = searchResults.filter(row => {
+                        const buyer = (row.receiver_address || '').toLowerCase().replace(/^0x/, '');
+                        return buyer === normalized;
+                      });
+                      sales = searchResults.filter(row => {
+                        const seller = (row.seller_address || '').toLowerCase().replace(/^0x/, '');
+                        return seller === normalized;
+                      });
+                      // Try to get associated username (prefer buyer, then seller)
+                      username = purchases[0]?.receiver_username || sales[0]?.seller_username || input;
+                    } else {
+                      purchases = searchResults.filter(row => (row.receiver_username && row.receiver_username.toLowerCase() === lowerInput));
+                      sales = searchResults.filter(row => (row.seller_username && row.seller_username.toLowerCase() === lowerInput));
+                      username = input;
+                    }
+                    const totalSpent = purchases.reduce((sum, row) => sum + (parseFloat(row.price) || 0), 0);
+                    const purchaseCount = purchases.length;
+                    const avgSpent = purchaseCount > 0 ? totalSpent / purchaseCount : 0;
+                    const totalEarned = sales.reduce((sum, row) => sum + (parseFloat(row.price) || 0), 0);
+                    const salesCount = sales.length;
+                    const avgEarned = salesCount > 0 ? totalEarned / salesCount : 0;
+                    const netVolume = totalEarned - totalSpent;
+                    const totalTransactions = purchaseCount + salesCount;
+                    const fmt = n => `$${n.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    return (
+                      <div style={{ marginBottom: 24 }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 12, background: '#f7faff', borderRadius: 8 }}>
+                          <tbody>
+                            <tr>
+                              <td style={{ fontWeight: 600, padding: 8, color: '#2196F3' }}>Buying Activity</td>
+                              <td style={{ padding: 8 }}>Total Spent {fmt(totalSpent)}</td>
+                              <td style={{ padding: 8 }}>Purchases: {purchaseCount}</td>
+                              <td style={{ padding: 8 }}>Average: {fmt(avgSpent)}</td>
+                              <td style={{ padding: 8, color: '#888' }}>as <b>{username}</b></td>
+                            </tr>
+                            <tr>
+                              <td style={{ fontWeight: 600, padding: 8, color: '#4CAF50' }}>Selling Activity</td>
+                              <td style={{ padding: 8 }}>Total Earned {fmt(totalEarned)}</td>
+                              <td style={{ padding: 8 }}>Sales: {salesCount}</td>
+                              <td style={{ padding: 8 }}>Average: {fmt(avgEarned)}</td>
+                              <td style={{ padding: 8, color: '#888' }}>as <b>{username}</b></td>
+                            </tr>
+                            <tr>
+                              <td style={{ fontWeight: 600, padding: 8, color: '#333' }}>Summary</td>
+                              <td style={{ padding: 8 }}>Net Volume {fmt(netVolume)}</td>
+                              <td style={{ padding: 8 }}>Total Transactions: {totalTransactions}</td>
+                              <td></td>
+                              <td></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  })()}
+                  <div style={{ maxHeight: 400, overflowY: 'auto', marginTop: 16 }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
+                      <thead>
+                        <tr style={{ background: '#e3e3e3' }}>
+                          <th style={{ padding: 8, border: '1px solid #ddd' }}>Date</th>
+                          <th style={{ padding: 8, border: '1px solid #ddd' }}>Buyer</th>
+                          <th style={{ padding: 8, border: '1px solid #ddd' }}>Seller</th>
+                          <th style={{ padding: 8, border: '1px solid #ddd' }}>Price</th>
+                          <th style={{ padding: 8, border: '1px solid #ddd' }}>Commission</th>
+                          <th style={{ padding: 8, border: '1px solid #ddd' }}>Pin</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {searchResults.map((row, idx) => (
+                          <tr key={idx}>
+                            <td style={{ padding: 8, border: '1px solid #eee' }}>{row.updated_at_block_time ? new Date(row.updated_at_block_time).toLocaleString() : ''}</td>
+                            <td style={{ padding: 8, border: '1px solid #eee' }}>{row.receiver_username || row.receiver_address}</td>
+                            <td style={{ padding: 8, border: '1px solid #eee' }}>{row.seller_username || row.seller_address}</td>
+                            <td style={{ padding: 8, border: '1px solid #eee' }}>${parseFloat(row.price).toLocaleString()}</td>
+                            <td style={{ padding: 8, border: '1px solid #eee' }}>${parseFloat(row.commission_amount).toLocaleString()}</td>
+                            <td style={{ padding: 8, border: '1px solid #eee' }}>
+                              {(() => {
+                                // Match TopSalesTable: use nft_edition_set_truncatedName, nft_edition_shape_name, nft_edition_variant
+                                const set = row.nft_edition_set_truncatedName || 'Unknown';
+                                const shape = row.nft_edition_shape_name || 'Unknown';
+                                const variant = row.nft_edition_variant || '';
+                                let pin = `${set} - ${shape}`;
+                                if (variant) pin += ` - ${variant}`;
+                                // If all are Unknown or empty, fallback
+                                if ((set === 'Unknown' && shape === 'Unknown' && !variant)) {
+                                  return row.pin_name || row.pin_id || '';
+                                }
+                                return pin;
+                              })()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div style={{ color: '#888', textAlign: 'right', marginTop: 8 }}>
+                      Showing {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                </React.Fragment>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        </React.Fragment>
       )}
     </div>
   );
 }
 
-export default App; 
+export default App;
