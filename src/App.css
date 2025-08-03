@@ -6,7 +6,7 @@
   text-align: center !important;
 }
 /* --- Mobile Optimizations for User Search & Pin Data Tabs --- */
-@media (max-width: 700px) {
+@media (max-width: 1200px) {
   .usersearch-summary-table-wrapper {
     max-width: 100vw;
     padding: 0 2vw;
