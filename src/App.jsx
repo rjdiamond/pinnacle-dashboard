@@ -496,6 +496,10 @@ function App() {
                     const totalSales = pinTabResults.length;
                     const totalVolume = pinTabResults.reduce((sum, row) => sum + (parseFloat(row.price) || 0), 0);
                     const avgPrice = totalSales > 0 ? totalVolume / totalSales : 0;
+                    // Average price of last 10 sales (top 10 rows)
+                    const last10 = pinTabResults.slice(0, 10);
+                    const last10Total = last10.reduce((sum, row) => sum + (parseFloat(row.price) || 0), 0);
+                    const avgLast10 = last10.length > 0 ? last10Total / last10.length : 0;
                     const fmt = n => `$${n.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                     return (
                       <table className="usersearch-results-table usersearch-summary-table">
@@ -505,6 +509,7 @@ function App() {
                             <td style={{ padding: 8 }}>Total Sales Volume: {fmt(totalVolume)}</td>
                             <td style={{ padding: 8 }}>Total Sales: {totalSales}</td>
                             <td style={{ padding: 8 }}>Average Price: {fmt(avgPrice)}</td>
+                            <td style={{ padding: 8 }}>Average Price (Last 10): {fmt(avgLast10)}</td>
                           </tr>
                         </tbody>
                       </table>
