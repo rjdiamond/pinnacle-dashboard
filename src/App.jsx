@@ -578,11 +578,6 @@ function App() {
           <h2 className="event-subtitle">{EVENTS[selectedEvent].title}</h2>
           <p style={{ textAlign: 'center', color: '#666', marginBottom: '0.5rem', fontSize: '1rem' }}>
             Data Auto-Refreshes During Live Events
-            {lastDataLoad && (
-              <span style={{ display: 'block', fontSize: '0.9rem', color: '#888', marginTop: '0.25rem' }}>
-                Last updated locally: {lastDataLoad.toLocaleTimeString()} | Local refresh: #{dataLoadCount}
-              </span>
-            )}
           </p>
           {/* Event Filter Buttons */}
           <div className="event-filter-container">
@@ -636,7 +631,7 @@ function App() {
             </button>
             <button 
               className="giveaway-button"
-              onClick={() => window.open('https://twitter.com', '_blank')}
+              onClick={() => window.open('https://x.com/DiamondNFL/status/1951364965518254269', '_blank')}
             >
               Giveaway
             </button>
