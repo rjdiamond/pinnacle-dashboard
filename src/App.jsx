@@ -634,12 +634,12 @@ function App() {
             >
               Event VII
             </button>
-            <button 
+            {/* <button 
               className="giveaway-button"
               onClick={() => window.open('https://x.com/DiamondNFL/status/1951364965518254269', '_blank')}
             >
               Giveaway
-            </button>
+            </button>*/}
           </div>
           {/* End User Search chart-container */}
           <div className="summary-stats">
