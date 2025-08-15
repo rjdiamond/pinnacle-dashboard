@@ -61,7 +61,7 @@ const EVENTS = {
   ,
   'Event VIII': {
     startDate: new Date('2025-08-15T16:00:00.000Z'), // Aug 15, 2025 9:00 AM PDT
-    endDate: new Date('2025-08-18T17:05:00.000Z'),   // Aug 19, 2025 12:00 AM PDT
+    endDate: new Date('2025-08-18T17:05:00.000Z'),   // Aug 18, 2025 12:00 AM PDT
     title: 'Event VIII (August 15th – August 18th, 2025)'
   }
 };
