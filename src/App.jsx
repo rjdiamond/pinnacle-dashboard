@@ -58,6 +58,12 @@ const EVENTS = {
     endDate: new Date('2025-08-04T17:15:00.000Z'),   // Aug 4, 2025 9:05 AM PDT
     title: 'Event VII (August 1st – August 4th, 2025)'
   }
+  ,
+  'Event VIII': {
+    startDate: new Date('2025-08-15T16:00:00.000Z'), // Aug 15, 2025 9:00 AM PDT
+    endDate: new Date('2025-08-19T17:05:00.000Z'),   // Aug 19, 2025 12:00 AM PDT
+    title: 'Event VIII (August 15th – August 19th, 2025)'
+  }
 };
 
 
@@ -66,7 +72,7 @@ function App() {
   const [fullData, setFullData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState('Event VII');
+  const [selectedEvent, setSelectedEvent] = useState('Event VIII');
   const [lastDataLoad, setLastDataLoad] = useState(null);
   const [dataLoadCount, setDataLoadCount] = useState(0);
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' or 'usersearch'
@@ -134,27 +140,6 @@ function App() {
         lastTransaction: validTimestamps[validTimestamps.length - 1] || 'None',
         sampleDataDates: sampleDates
       });
-      
-      // Special debugging for Event VI
-      if (eventKey === 'Event VI' && filtered.length === 0) {
-        console.log('🔍 Event VI Debug - No transactions found. Checking data around that time period...');
-        const julyTransactions = fullData.filter(row => {
-          if (!row.updated_at_block_time) return false;
-          try {
-            const date = new Date(row.updated_at_block_time);
-            if (isNaN(date.getTime())) return false;
-            return date.getMonth() === 6 && date.getFullYear() === 2025; // July 2025
-          } catch {
-            return false;
-          }
-        });
-        console.log(`Found ${julyTransactions.length} transactions in July 2025:`, 
-          julyTransactions.slice(0, 3).map(row => ({
-            date: row.updated_at_block_time,
-            price: row.price
-          }))
-        );
-      }
     }
     
     return filtered;
@@ -168,11 +153,11 @@ function App() {
     // Auto-refresh only for live events, but don't reload when switching events
     let interval;
   
-    if (selectedEvent === 'Event VII') {  // For auto-refresh && autoRefresh)
+    if (selectedEvent === 'Event VIII') {  // For auto-refresh && autoRefresh)
       interval = setInterval(() => {
         console.log('[Live] Auto-refreshing...');
         loadData();
-      }, 60000000); // every 60 seconds
+      }, 30000); // every 30 seconds
     }
   
     return () => clearInterval(interval);
@@ -634,12 +619,20 @@ function App() {
             >
               Event VII
             </button>
-            {/* <button 
+                        <button 
+              className={`live-button ${selectedEvent === 'Event VIII' ? 'active' : ''}`}
+              onClick={() => handleEventChange('Event VIII')}
+            >
+              Event VII
+            </button>
+            {/*
+            <button 
               className="giveaway-button"
               onClick={() => window.open('https://x.com/DiamondNFL/status/1951364965518254269', '_blank')}
             >
               Giveaway
-            </button>*/}
+            </button>
+            */}
           </div>
           {/* End User Search chart-container */}
           <div className="summary-stats">
