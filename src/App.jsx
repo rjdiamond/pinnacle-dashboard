@@ -61,7 +61,7 @@ const EVENTS = {
   ,
   'Event VIII': {
     startDate: new Date('2025-08-15T16:00:00.000Z'), // Aug 15, 2025 9:00 AM PDT
-    endDate: new Date('2025-08-18T17:05:00.000Z'),   // Aug 18, 2025 12:00 AM PDT
+    endDate: new Date('2025-08-18T17:05:00.000Z'),   // Aug 19, 2025 12:00 AM PDT
     title: 'Event VIII (August 15th – August 18th, 2025)'
   }
 };
@@ -75,7 +75,7 @@ function App() {
   const [selectedEvent, setSelectedEvent] = useState('Event VIII');
   const [lastDataLoad, setLastDataLoad] = useState(null);
   const [dataLoadCount, setDataLoadCount] = useState(0);
-  const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' or 'usersearch'
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [searchInput, setSearchInput] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchSubmitted, setSearchSubmitted] = useState(false);
@@ -216,63 +216,11 @@ function App() {
         
         const eventFilteredData = filterDataByEvent(fullData, selectedEvent);
         setData(eventFilteredData);
-        console.log(`[Data Load Complete] ${fullData.length} total records, ${eventFilteredData.length} for ${selectedEvent}`);
       })
-      .catch((err) => setError(err.message || 'Error loading data'))
-      .finally(() => setLoading(false));
-  };
-  
-
-  // Handle event selection with smooth transitions (no data reload needed)
-  const handleEventChange = (eventKey) => {
-    if (eventKey === selectedEvent) return; // Prevent unnecessary re-renders
-    
-    console.log(`Switching to ${eventKey} (filtering existing data)`);
-    
-    // Small delay to show transition
-    setTimeout(() => {
-      setSelectedEvent(eventKey);
-      // Filter existing fullData instead of reloading
-      const eventFilteredData = filterDataByEvent(fullData, eventKey);
-      setData(eventFilteredData);
-    }, 150);
-  };
-
-
-  if (loading) return <div className="dashboard-loading">Loading data...</div>;
-  if (error) return <div className="dashboard-error">{error}</div>;
-
-  // --- User Search Logic ---
-  const handleUserSearch = (e) => {
-    e.preventDefault();
-    setSearchSubmitted(true);
-    setLastSearchInput(searchInput);
-    let results = [];
-    const input = searchInput.trim();
-    if (!input) {
-      setSearchResults([]);
-      return;
-    }
-    // Detect if input is a wallet address (hex, 12+ chars, with or without 0x)
-    const isWallet = /^0x?[a-fA-F0-9]{12,}$/.test(input);
-    if (isWallet) {
-      // Normalize input: remove 0x if present, lowercase
-      let normalized = input.toLowerCase().replace(/^0x/, '');
-      results = fullData.filter(row => {
-        // Normalize both addresses: remove 0x if present, lowercase
-        const buyer = (row.receiver_flowAddress || '').toLowerCase().replace(/^0x/, '');
-        const seller = (row.seller_flowAddress || '').toLowerCase().replace(/^0x/, '');
-        return buyer === normalized || seller === normalized;
+      .catch(err => {
+        setError(err);
+        setLoading(false);
       });
-    } else {
-      // Treat as username (case-insensitive)
-      const lowerInput = input.toLowerCase();
-      results = fullData.filter(row =>
-        (row.receiver_username && row.receiver_username.toLowerCase() === lowerInput) ||
-        (row.seller_username && row.seller_username.toLowerCase() === lowerInput)
-      );
-    }
-    setSearchResults(results);
   };
 
   // Calculate summary statistics with error handling
@@ -290,10 +238,46 @@ function App() {
   const uniqueBuyers = data ? new Set(data.map(row => row.receiver_username).filter(Boolean)) : new Set();
   const uniqueSellers = data ? new Set(data.map(row => row.seller_username).filter(Boolean)) : new Set();
 
+  // Add missing handleUserSearch function
+  const handleUserSearch = (e) => {
+    e.preventDefault();
+    setSearchSubmitted(true);
+    setLastSearchInput(searchInput);
+    // Search for username or wallet address
+    const input = searchInput.trim().toLowerCase();
+    if (!input) {
+      setSearchResults([]);
+      return;
+    }
+    const isWallet = /^0x?[a-fA-F0-9]{12,}$/.test(input);
+    let normalized = input.startsWith('0x') ? input.slice(2) : input;
+    let results = [];
+    if (isWallet) {
+      results = fullData.filter(row => {
+        const buyer = (row.receiver_flowAddress || row.receiver_address || '').toLowerCase().replace(/^0x/, '');
+        const seller = (row.seller_flowAddress || row.seller_address || '').toLowerCase().replace(/^0x/, '');
+        return buyer === normalized || seller === normalized;
+      });
+    } else {
+      results = fullData.filter(row => {
+        return (row.receiver_username && row.receiver_username.toLowerCase() === input) ||
+               (row.seller_username && row.seller_username.toLowerCase() === input);
+      });
+    }
+    setSearchResults(results);
+  };
+
   return (
     <div className="dashboard-container">
       {/* Tab Navigation */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', justifyContent: 'center' }}>
+        <button
+          className={activeTab === 'Home' ? 'active' : ''}
+          style={{ padding: '0.5rem 1.5rem', fontWeight: 'bold', borderRadius: '6px', border: '1px solid #673ab7', background: activeTab === 'Home' ? '#7e5db8ff' : '#fff', color: activeTab === 'Home' ? '#fff' : '#7e5db8ff', cursor: 'pointer' }}
+          onClick={() => setActiveTab('Home')}
+        >
+          Home
+        </button>
         <button
           className={activeTab === 'dashboard' ? 'active' : ''}
           style={{ padding: '0.5rem 1.5rem', fontWeight: 'bold', borderRadius: '6px', border: '1px solid #2196F3', background: activeTab === 'dashboard' ? '#2196F3' : '#fff', color: activeTab === 'dashboard' ? '#fff' : '#2196F3', cursor: 'pointer' }}
@@ -571,68 +555,62 @@ function App() {
           </p>
           {/* Event Filter Buttons */}
           <div className="event-filter-container">
-            <button 
-              className={`event-button ${selectedEvent === 'All' ? 'active' : ''}`}
-              onClick={() => handleEventChange('All')}
-            >
-              All
-            </button>
-            <button 
-              className={`event-button ${selectedEvent === 'Event I' ? 'active' : ''}`}
-              onClick={() => handleEventChange('Event I')}
-            >
-              Event I
-            </button>
-            <button 
-              className={`event-button ${selectedEvent === 'Event II' ? 'active' : ''}`}
-              onClick={() => handleEventChange('Event II')}
-            >
-              Event II
-            </button>
-            <button 
-              className={`event-button ${selectedEvent === 'Event III' ? 'active' : ''}`}
-              onClick={() => handleEventChange('Event III')}
-            >
-              Event III
-            </button>
-            <button 
-              className={`event-button ${selectedEvent === 'Event IV' ? 'active' : ''}`}
-              onClick={() => handleEventChange('Event IV')}
-            >
-              Event IV
-            </button>
-            <button 
-              className={`event-button ${selectedEvent === 'Event V' ? 'active' : ''}`}
-              onClick={() => handleEventChange('Event V')}
-            >
-              Event V
-            </button>
-            <button 
-              className={`event-button ${selectedEvent === 'Event VI' ? 'active' : ''}`}
-              onClick={() => handleEventChange('Event VI')}
-            >
-              Event VI
-            </button>
-            <button 
-              className={`event-button ${selectedEvent === 'Event VII' ? 'active' : ''}`}
-              onClick={() => handleEventChange('Event VII')}
-            >
-              Event VII
-            </button>
-                        <button 
-              className={`live-button ${selectedEvent === 'Event VIII' ? 'active' : ''}`}
-              onClick={() => handleEventChange('Event VIII')}
-            >
-              Event VIII
-            </button>
-            {/*
-            <button 
-              className="giveaway-button"
-              onClick={() => window.open('https://x.com/DiamondNFL/status/1951364965518254269', '_blank')}
-            >
-              Giveaway
-            </button>
-            */}
+            <>
+              <button 
+                className={`event-button ${selectedEvent === 'Event I' ? 'active' : ''}`}
+                onClick={() => handleEventChange('Event I')}
+              >
+                Event I
+              </button>
+              <button 
+                className={`event-button ${selectedEvent === 'Event II' ? 'active' : ''}`}
+                onClick={() => handleEventChange('Event II')}
+              >
+                Event II
+              </button>
+              <button 
+                className={`event-button ${selectedEvent === 'Event III' ? 'active' : ''}`}
+                onClick={() => handleEventChange('Event III')}
+              >
+                Event III
+              </button>
+              <button 
+                className={`event-button ${selectedEvent === 'Event IV' ? 'active' : ''}`}
+                onClick={() => handleEventChange('Event IV')}
+              >
+                Event IV
+              </button>
+              <button 
+                className={`event-button ${selectedEvent === 'Event V' ? 'active' : ''}`}
+                onClick={() => handleEventChange('Event V')}
+              >
+                Event V
+              </button>
+              <button 
+                className={`event-button ${selectedEvent === 'Event VI' ? 'active' : ''}`}
+                onClick={() => handleEventChange('Event VI')}
+              >
+                Event VI
+              </button>
+              <button 
+                className={`event-button ${selectedEvent === 'Event VII' ? 'active' : ''}`}
+                onClick={() => handleEventChange('Event VII')}
+              >
+                Event VII
+              </button>
+              <button 
+                className={`live-button ${selectedEvent === 'Event VIII' ? 'active' : ''}`}
+                onClick={() => handleEventChange('Event VIII')}
+              >
+                Event VIII
+              </button>
+              <button 
+                className={`event-button ${selectedEvent === 'All' ? 'active' : ''}`}
+                onClick={() => handleEventChange('All')}
+              >
+                All
+              </button>
+            </>
           </div>
           {/* End User Search chart-container */}
           <div className="summary-stats">
@@ -716,6 +694,67 @@ function App() {
           <div style={{ textAlign: 'center', marginTop: '2rem', color: '#666' }}>
             Data loaded: {data.length} transactions
           </div>
+        </React.Fragment>
+      )}
+
+      {activeTab === 'Home' && (
+        <React.Fragment>
+          <h1>Disney Pinnacle Marketplace Summary</h1>
+          <h2 style={{textAlign:'center',marginBottom:'1rem'}}>All Marketplace Events</h2>
+          <div className="summary-stats">
+            <div className="stat-card">
+              <div className="stat-number" style={{ color: '#2196F3' }}>{fullData.length.toLocaleString()}</div>
+              <div className="stat-label">Total Transactions</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-number" style={{ color: '#2196F3' }}>${fullData.reduce((sum, row) => sum + (parseFloat(row.price)||0), 0).toLocaleString()}</div>
+              <div className="stat-label">Total Sales</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-number" style={{ color: '#2196F3' }}>${fullData.reduce((sum, row) => sum + (parseFloat(row.commission_amount)||0), 0).toLocaleString()}</div>
+              <div className="stat-label">Total Commission</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-number" style={{ color: '#4CAF50' }}>{[...new Set(fullData.map(row => row.receiver_username).filter(Boolean))].length.toLocaleString()}</div>
+              <div className="stat-label">Unique Buyers</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-number" style={{ color: '#4CAF50' }}>{[...new Set(fullData.map(row => row.seller_username).filter(Boolean))].length.toLocaleString()}</div>
+              <div className="stat-label">Unique Sellers</div>
+            </div>
+          </div>
+          <hr style={{margin:'2rem 0'}}/>
+          <h2 style={{textAlign:'center',marginBottom:'1rem'}}>Event Stats</h2>
+          {['Event VIII','Event VII','Event VI','Event V','Event IV','Event III','Event II','Event I'].map(eventKey => {
+            const eventData = filterDataByEvent(fullData, eventKey);
+            return (
+              <div key={eventKey} style={{marginBottom:'2rem'}}>
+                <h3 style={{color:'#eb7750ff',textAlign:'center'}}>{EVENTS[eventKey].title}</h3>
+                <div className="summary-stats">
+                  <div className="stat-card">
+                    <div className="stat-number" style={{ color: '#2196F3' }}>{eventData.length.toLocaleString()}</div>
+                    <div className="stat-label">Total Transactions</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-number" style={{ color: '#2196F3' }}>${eventData.reduce((sum, row) => sum + (parseFloat(row.price)||0), 0).toLocaleString()}</div>
+                    <div className="stat-label">Total Sales</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-number" style={{ color: '#2196F3' }}>${eventData.reduce((sum, row) => sum + (parseFloat(row.commission_amount)||0), 0).toLocaleString()}</div>
+                    <div className="stat-label">Total Commission</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-number" style={{ color: '#4CAF50' }}>{[...new Set(eventData.map(row => row.receiver_username).filter(Boolean))].length.toLocaleString()}</div>
+                    <div className="stat-label">Unique Buyers</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-number" style={{ color: '#4CAF50' }}>{[...new Set(eventData.map(row => row.seller_username).filter(Boolean))].length.toLocaleString()}</div>
+                    <div className="stat-label">Unique Sellers</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </React.Fragment>
       )}
 
