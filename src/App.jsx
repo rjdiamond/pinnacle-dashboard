@@ -720,28 +720,34 @@ function App() {
         <React.Fragment>
           <h1>Disney Pinnacle Marketplace Summary</h1>
           <h2 style={{textAlign:'center',marginBottom:'1rem'}}>All Marketplace Events</h2>
-          <div className="summary-stats">
-            <div className="stat-card">
-              <div className="stat-number" style={{ color: '#2196F3' }}>{fullData.length.toLocaleString()}</div>
-              <div className="stat-label">Total Transactions</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number" style={{ color: '#2196F3' }}>${fullData.reduce((sum, row) => sum + (parseFloat(row.price)||0), 0).toLocaleString()}</div>
-              <div className="stat-label">Total Sales</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number" style={{ color: '#2196F3' }}>${fullData.reduce((sum, row) => sum + (parseFloat(row.commission_amount)||0), 0).toLocaleString()}</div>
-              <div className="stat-label">Total Commission</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number" style={{ color: '#4CAF50' }}>{[...new Set(fullData.map(row => row.receiver_username).filter(Boolean))].length.toLocaleString()}</div>
-              <div className="stat-label">Unique Buyers</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-number" style={{ color: '#4CAF50' }}>{[...new Set(fullData.map(row => row.seller_username).filter(Boolean))].length.toLocaleString()}</div>
-              <div className="stat-label">Unique Sellers</div>
-            </div>
-          </div>
+          {/* Use the same filtered data as 'All' event for summary */}
+          {(() => {
+            const allEventData = filterDataByEvent(fullData, 'All');
+            return (
+              <div className="summary-stats">
+                <div className="stat-card">
+                  <div className="stat-number" style={{ color: '#2196F3' }}>{allEventData.length.toLocaleString()}</div>
+                  <div className="stat-label">Total Transactions</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-number" style={{ color: '#2196F3' }}>${allEventData.reduce((sum, row) => sum + (parseFloat(row.price)||0), 0).toLocaleString()}</div>
+                  <div className="stat-label">Total Sales</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-number" style={{ color: '#2196F3' }}>${allEventData.reduce((sum, row) => sum + (parseFloat(row.commission_amount)||0), 0).toLocaleString()}</div>
+                  <div className="stat-label">Total Commission</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-number" style={{ color: '#4CAF50' }}>{[...new Set(allEventData.map(row => row.receiver_username).filter(Boolean))].length.toLocaleString()}</div>
+                  <div className="stat-label">Unique Buyers</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-number" style={{ color: '#4CAF50' }}>{[...new Set(allEventData.map(row => row.seller_username).filter(Boolean))].length.toLocaleString()}</div>
+                  <div className="stat-label">Unique Sellers</div>
+                </div>
+              </div>
+            );
+          })()}
           <hr style={{margin:'2rem 0'}}/>
           <h2 style={{textAlign:'center',marginBottom:'1rem'}}>Event Stats</h2>
           {['Event VIII','Event VII','Event VI','Event V','Event IV','Event III','Event II','Event I'].map(eventKey => {
