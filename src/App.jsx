@@ -723,6 +723,8 @@ function App() {
           {/* Use the same filtered data as 'All' event for summary */}
           {(() => {
             const allEventData = filterDataByEvent(fullData, 'All');
+            const uniqueBuyerWallets = new Set(allEventData.map(row => row.receiver_flowAddress).filter(addr => addr && typeof addr === 'string' && addr.trim() !== ''));
+            const uniqueSellerWallets = new Set(allEventData.map(row => row.seller_flowAddress).filter(addr => addr && typeof addr === 'string' && addr.trim() !== ''));
             return (
               <div className="summary-stats">
                 <div className="stat-card">
@@ -738,11 +740,11 @@ function App() {
                   <div className="stat-label">Total Commission</div>
                 </div>
                 <div className="stat-card">
-                  <div className="stat-number" style={{ color: '#4CAF50' }}>{[...new Set(allEventData.map(row => row.receiver_username).filter(Boolean))].length.toLocaleString()}</div>
+                  <div className="stat-number" style={{ color: '#4CAF50' }}>{uniqueBuyerWallets.size.toLocaleString()}</div>
                   <div className="stat-label">Unique Buyers</div>
                 </div>
                 <div className="stat-card">
-                  <div className="stat-number" style={{ color: '#4CAF50' }}>{[...new Set(allEventData.map(row => row.seller_username).filter(Boolean))].length.toLocaleString()}</div>
+                  <div className="stat-number" style={{ color: '#4CAF50' }}>{uniqueSellerWallets.size.toLocaleString()}</div>
                   <div className="stat-label">Unique Sellers</div>
                 </div>
               </div>
