@@ -61,7 +61,7 @@ const EVENTS = {
   ,
   'Event VIII': {
     startDate: new Date('2025-08-15T16:00:00.000Z'), // Aug 15, 2025 9:00 AM PDT
-    endDate: new Date('2025-08-18T17:05:00.000Z'),   // Aug 19, 2025 12:00 AM PDT
+    endDate: new Date('2025-08-18T17:05:00.000Z'),   // Aug 18, 2025 12:00 AM PDT
     title: 'Event VIII (August 15th – August 18th, 2025)'
   }
 };
@@ -245,9 +245,9 @@ function App() {
     return sum + (isNaN(commission) ? 0 : commission);
   }, 0) : 0;
   
-  // Calculate unique buyers and sellers with error handling
-  const uniqueBuyers = data ? new Set(data.map(row => row.receiver_username).filter(Boolean)) : new Set();
-  const uniqueSellers = data ? new Set(data.map(row => row.seller_username).filter(Boolean)) : new Set();
+  // Calculate unique buyers and sellers by wallet address (receiver_flowAddress/seller_flowAddress)
+  const uniqueBuyers = data ? new Set(data.map(row => row.receiver_flowAddress).filter(addr => addr && typeof addr === 'string' && addr.trim() !== '')) : new Set();
+  const uniqueSellers = data ? new Set(data.map(row => row.seller_flowAddress).filter(addr => addr && typeof addr === 'string' && addr.trim() !== '')) : new Set();
 
   // Add missing handleUserSearch function
   const handleUserSearch = (e) => {
