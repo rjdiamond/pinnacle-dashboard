@@ -19,8 +19,8 @@ import './App.css';
 // Event date ranges (in PST)
 const EVENTS = {
   'All': {
-    startDate: null,
-    endDate: null,
+    startDate: new Date('2024-12-19T17:00:00.000Z'), // Dec 19, 2024 9:00 AM PST (Event I start)
+    endDate: new Date('2025-08-18T17:05:00.000Z'),   // Aug 19, 2025 12:00 AM PDT (Event VIII end)
     title: 'All Events (Complete History)'
   },
   'Event I': {
@@ -90,18 +90,33 @@ function App() {
 
   // Filter data based on selected event
   const filterDataByEvent = (fullData, eventKey) => {
+    if (eventKey === 'All') {
+      // Only include rows that fall within any Event I–VIII window
+      const eventWindows = [
+        EVENTS['Event I'], EVENTS['Event II'], EVENTS['Event III'], EVENTS['Event IV'],
+        EVENTS['Event V'], EVENTS['Event VI'], EVENTS['Event VII'], EVENTS['Event VIII']
+      ];
+      return fullData.filter(row => {
+        if (!row.updated_at_block_time) return false;
+        try {
+          const utcDate = new Date(row.updated_at_block_time);
+          if (isNaN(utcDate.getTime())) return false;
+          // Only include if within any event window
+          return eventWindows.some(ev => utcDate >= ev.startDate && utcDate <= ev.endDate);
+        } catch {
+          return false;
+        }
+      });
+    }
     const event = EVENTS[eventKey];
     if (!event.startDate || !event.endDate) {
       return fullData;
     }
-    
     // Robust UTC filtering with error handling
     const filtered = fullData.filter(row => {
       if (!row.updated_at_block_time) return false;
-      
       try {
         const utcDate = new Date(row.updated_at_block_time);
-        // Check if the date is valid
         if (isNaN(utcDate.getTime())) {
           console.warn('Invalid date found:', row.updated_at_block_time);
           return false;
@@ -112,7 +127,6 @@ function App() {
         return false;
       }
     });
-    
     // Debug: log min/max timestamps for all events to help troubleshoot
     if (eventKey !== 'All') {
       const validTimestamps = filtered
@@ -126,11 +140,9 @@ function App() {
           }
         })
         .sort();
-        
       const sampleDates = fullData.slice(0, 5)
         .map(row => row.updated_at_block_time)
         .filter(timestamp => timestamp); // Filter out undefined/null
-      
       console.log(`${eventKey} filtering:`, {
         startDate: event.startDate.toISOString(),
         endDate: event.endDate.toISOString(),
@@ -141,7 +153,6 @@ function App() {
         sampleDataDates: sampleDates
       });
     }
-    
     return filtered;
   };
 
