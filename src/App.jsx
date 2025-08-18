@@ -278,6 +278,14 @@ function App() {
     setSearchResults(results);
   };
 
+  // Add missing handleEventChange function for event switching
+  const handleEventChange = (eventKey) => {
+    setSelectedEvent(eventKey);
+    // Re-filter data for the selected event
+    const eventFilteredData = filterDataByEvent(fullData, eventKey);
+    setData(eventFilteredData);
+  };
+
   return (
     <div className="dashboard-container">
       {/* Tab Navigation */}
