@@ -754,6 +754,8 @@ function App() {
           <h2 style={{textAlign:'center',marginBottom:'1rem'}}>Event Stats</h2>
           {['Event VIII','Event VII','Event VI','Event V','Event IV','Event III','Event II','Event I'].map(eventKey => {
             const eventData = filterDataByEvent(fullData, eventKey);
+            const uniqueBuyerWallets = new Set(eventData.map(row => row.receiver_flowAddress).filter(addr => addr && typeof addr === 'string' && addr.trim() !== ''));
+            const uniqueSellerWallets = new Set(eventData.map(row => row.seller_flowAddress).filter(addr => addr && typeof addr === 'string' && addr.trim() !== ''));
             return (
               <div key={eventKey} style={{marginBottom:'2rem'}}>
                 <h3 style={{color:'#eb7750ff',textAlign:'center'}}>{EVENTS[eventKey].title}</h3>
@@ -771,11 +773,11 @@ function App() {
                     <div className="stat-label">Total Commission</div>
                   </div>
                   <div className="stat-card">
-                    <div className="stat-number" style={{ color: '#4CAF50' }}>{[...new Set(eventData.map(row => row.receiver_username).filter(Boolean))].length.toLocaleString()}</div>
+                    <div className="stat-number" style={{ color: '#4CAF50' }}>{uniqueBuyerWallets.size.toLocaleString()}</div>
                     <div className="stat-label">Unique Buyers</div>
                   </div>
                   <div className="stat-card">
-                    <div className="stat-number" style={{ color: '#4CAF50' }}>{[...new Set(eventData.map(row => row.seller_username).filter(Boolean))].length.toLocaleString()}</div>
+                    <div className="stat-number" style={{ color: '#4CAF50' }}>{uniqueSellerWallets.size.toLocaleString()}</div>
                     <div className="stat-label">Unique Sellers</div>
                   </div>
                 </div>
