@@ -64,6 +64,12 @@ const EVENTS = {
     endDate: new Date('2025-08-18T17:05:00.000Z'),   // Aug 18, 2025 12:00 AM PDT
     title: 'Event VIII (August 15th – August 18th, 2025)'
   }
+    ,
+  'Event IX': {
+    startDate: new Date('2025-08-29T16:00:00.000Z'), // Aug 15, 2025 9:00 AM PDT
+    endDate: new Date('2025-09-01T17:05:00.000Z'),   // Aug 18, 2025 12:00 AM PDT
+    title: 'Event VIII (August 29th – September 1st, 2025)'
+  }
 };
 
 
@@ -72,7 +78,7 @@ function App() {
   const [fullData, setFullData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState('Event VIII');
+  const [selectedEvent, setSelectedEvent] = useState('Event IX');
   const [lastDataLoad, setLastDataLoad] = useState(null);
   const [dataLoadCount, setDataLoadCount] = useState(0);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -91,10 +97,11 @@ function App() {
   // Filter data based on selected event
   const filterDataByEvent = (fullData, eventKey) => {
     if (eventKey === 'All') {
-      // Only include rows that fall within any Event I–VIII window
+      // Only include rows that fall within any Event I–IX window
       const eventWindows = [
         EVENTS['Event I'], EVENTS['Event II'], EVENTS['Event III'], EVENTS['Event IV'],
-        EVENTS['Event V'], EVENTS['Event VI'], EVENTS['Event VII'], EVENTS['Event VIII']
+        EVENTS['Event V'], EVENTS['Event VI'], EVENTS['Event VII'], EVENTS['Event VIII'],
+        EVENTS['Event IX']
       ];
       return fullData.filter(row => {
         if (!row.updated_at_block_time) return false;
@@ -164,7 +171,7 @@ function App() {
     // Auto-refresh only for live events, but don't reload when switching events
     let interval;
   
-    if (selectedEvent === 'Event VIII') {  // For auto-refresh && autoRefresh)
+    if (selectedEvent === 'Event IX') {  // For auto-refresh && autoRefresh)
       interval = setInterval(() => {
         console.log('[Live] Auto-refreshing...');
         loadData();
@@ -618,8 +625,14 @@ function App() {
                 Event VII
               </button>
               <button 
-                className={`live-button ${selectedEvent === 'Event VIII' ? 'active' : ''}`}
+                className={`event-button ${selectedEvent === 'Event VIII' ? 'active' : ''}`}
                 onClick={() => handleEventChange('Event VIII')}
+              >
+                Event VIII
+              </button>
+               <button 
+                className={`live-button ${selectedEvent === 'Event IX' ? 'active' : ''}`}
+                onClick={() => handleEventChange('Event IX')}
               >
                 Event VIII
               </button>
