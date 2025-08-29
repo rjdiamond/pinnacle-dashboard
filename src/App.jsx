@@ -634,7 +634,7 @@ function App() {
                 className={`live-button ${selectedEvent === 'Event IX' ? 'active' : ''}`}
                 onClick={() => handleEventChange('Event IX')}
               >
-                Event VIII
+                Event IX
               </button>
               <button 
                 className={`event-button ${selectedEvent === 'All' ? 'active' : ''}`}
