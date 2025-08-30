@@ -765,7 +765,7 @@ function App() {
           })()}
           <hr style={{margin:'2rem 0'}}/>
           <h2 style={{textAlign:'center',marginBottom:'1rem'}}>Event Stats</h2>
-          {['Event VIII','Event VII','Event VI','Event V','Event IV','Event III','Event II','Event I'].map(eventKey => {
+          {['Event IX','Event VIII','Event VII','Event VI','Event V','Event IV','Event III','Event II','Event I'].map(eventKey => {
             const eventData = filterDataByEvent(fullData, eventKey);
             const uniqueBuyerWallets = new Set(eventData.map(row => row.receiver_flowAddress).filter(addr => addr && typeof addr === 'string' && addr.trim() !== ''));
             const uniqueSellerWallets = new Set(eventData.map(row => row.seller_flowAddress).filter(addr => addr && typeof addr === 'string' && addr.trim() !== ''));
