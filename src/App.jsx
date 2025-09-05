@@ -70,6 +70,12 @@ const EVENTS = {
     endDate: new Date('2025-09-01T17:05:00.000Z'),   // Aug 18, 2025 12:00 AM PDT
     title: 'Event IX (August 29th – September 1st, 2025)'
   }
+      ,
+  'Event X': {
+    startDate: new Date('2025-09-05T16:00:00.000Z'),
+    endDate: new Date('2025-09-08T17:05:00.000Z'),   
+    title: 'Event X (September 5th - September 8th, 2025)'
+  }
 };
 
 
@@ -78,7 +84,7 @@ function App() {
   const [fullData, setFullData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState('Event IX');
+  const [selectedEvent, setSelectedEvent] = useState('Event X');
   const [lastDataLoad, setLastDataLoad] = useState(null);
   const [dataLoadCount, setDataLoadCount] = useState(0);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -101,7 +107,7 @@ function App() {
       const eventWindows = [
         EVENTS['Event I'], EVENTS['Event II'], EVENTS['Event III'], EVENTS['Event IV'],
         EVENTS['Event V'], EVENTS['Event VI'], EVENTS['Event VII'], EVENTS['Event VIII'],
-        EVENTS['Event IX']
+        EVENTS['Event IX'], EVENTS['Event X']
       ];
       return fullData.filter(row => {
         if (!row.updated_at_block_time) return false;
@@ -171,7 +177,7 @@ function App() {
     // Auto-refresh only for live events, but don't reload when switching events
     let interval;
   
-    if (selectedEvent === 'Event IX') {  // For auto-refresh && autoRefresh)
+    if (selectedEvent === 'Event X') {  // For auto-refresh && autoRefresh)
       interval = setInterval(() => {
         console.log('[Live] Auto-refreshing...');
         loadData();
@@ -631,10 +637,16 @@ function App() {
                 Event VIII
               </button>
                <button 
-                className={`live-button ${selectedEvent === 'Event IX' ? 'active' : ''}`}
+                className={`event-button ${selectedEvent === 'Event IX' ? 'active' : ''}`}
                 onClick={() => handleEventChange('Event IX')}
               >
                 Event IX
+              </button>
+              <button 
+                className={`live-button ${selectedEvent === 'Event X' ? 'active' : ''}`}
+                onClick={() => handleEventChange('Event X')}
+              >
+                Event X
               </button>
               <button 
                 className={`event-button ${selectedEvent === 'All' ? 'active' : ''}`}
